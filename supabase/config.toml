@@ -1,0 +1,76 @@
+# ApexTender v2.0 Supabase Local Development Configuration
+project_id = "rfp-engine"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public", "extensions"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[db.migrations]
+schema_migrations = "supabase_migrations"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[storage.buckets.rfp-documents]
+public = false
+file_size_limit = "50MiB"
+allowed_mime_types = [
+    "application/pdf",
+    "text/plain",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword"
+]
+
+[storage.buckets.documents]
+public = false
+file_size_limit = "50MiB"
+allowed_mime_types = [
+    "application/pdf",
+    "text/plain",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword"
+]
+
+[edge_runtime]
+enabled = true
+port = 54323
+inspector_port = 8083
+
+[analytics]
+enabled = false
+port = 54327
+vector_port = 54328
+
+[inbucket]
+enabled = true
+port = 54324
+smtp_port = 54325
+pop3_port = 54326

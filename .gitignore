@@ -1,0 +1,28 @@
+# Environments
+.env
+.env.local
+.env.*.local
+venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+.next/
+out/
+build/
+.npm
+
+# Supabase
+supabase/.temp/
+supabase/.branch/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
