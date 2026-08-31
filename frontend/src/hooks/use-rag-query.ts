@@ -113,7 +113,13 @@ export function useRagQuery() {
           }
         );
       } catch (err: any) {
-        if (err.name !== 'AbortError') {
+        if (err.name === 'AbortError') {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMsgId ? { ...msg, isStreaming: false } : msg
+            )
+          );
+        } else {
           setError(err.message || 'Error executing query');
           setMessages((prev) =>
             prev.map((msg) =>

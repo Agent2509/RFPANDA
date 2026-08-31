@@ -63,7 +63,7 @@ export function MessageBubble({
     lines.forEach((line, index) => {
       // Inline citation tag replacer: [[Doc: filename, p. X]] or [Doc: filename, p. X]
       const renderLineWithCitations = (text: string) => {
-        const citationRegex = /(\[\[?Doc:\s*([^,\]]+)(?:,\s*p\.\s*(\d+))?\]\]?)/g;
+        const citationRegex = /(\[\[?Doc:\s*([^,\]]+)(?:,\s*p\.\s*(\d+))?(?:\s*-\s*([^\]]+))?\]\]?)/g;
         const parts = [];
         let lastIndex = 0;
         let match;

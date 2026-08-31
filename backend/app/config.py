@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = Field(default="https://mock.supabase.co", description="Supabase project base URL")
     SUPABASE_SERVICE_ROLE_KEY: str = Field(default="mock-service-role-key", description="Supabase service role secret key")
     SUPABASE_ANON_KEY: str = Field(default="mock-anon-key", description="Supabase anonymous client key")
-    SUPABASE_JWT_SECRET: str = Field(default="test-jwt-secret-for-apextender-v2", description="Supabase JWT signature secret (HS256)")
+    SUPABASE_JWT_SECRET: str = Field(default="", description="Supabase JWT signature secret (HS256). REQUIRED for production.")
 
     # Voyage AI Configuration
     VOYAGE_API_KEY: str = Field(default="voyage-mock-api-key", description="Voyage AI API key")

@@ -110,7 +110,11 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
 
       const documentId = typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
-        : 'doc-' + Math.random().toString(36).substring(2, 15);
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          });
 
       const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `${user.id}/${documentId}/${sanitizedFileName}`;
@@ -160,6 +164,7 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
           });
 
         if (uploadResult.error) {
+          await supabase.from('documents').delete().eq('id', documentId);
           throw new Error(`Storage upload failed: ${uploadResult.error.message}`);
         }
       }

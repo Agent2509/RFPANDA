@@ -99,7 +99,8 @@ class VoyageEmbeddingService:
         payload = {
             "input": texts,
             "model": target_model,
-            "input_type": input_type
+            "input_type": input_type,
+            "output_dimension": 1024
         }
         headers = {
             "Authorization": f"Bearer {self.api_key}",

@@ -68,7 +68,7 @@ async def get_current_user(
         )
 
     # Test mode / Mock token fallback for local E2E simulation
-    if settings.TEST_MODE or token.startswith("test-token-") or token == "mock-token":
+    if settings.TEST_MODE and (token.startswith("test-token-") or token == "mock-token"):
         if token.startswith("test-token-"):
             user_id = token.replace("test-token-", "")
             return AuthenticatedUser(
@@ -88,7 +88,7 @@ async def get_current_user(
         payload = jwt.decode(
             token,
             settings.SUPABASE_JWT_SECRET,
-            algorithms=["HS256", "RS256"],
+            algorithms=["HS256"],
             options={
                 "verify_exp": True,
                 "verify_signature": True,

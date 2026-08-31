@@ -26,3 +26,10 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Caches & Test Artifacts
+.pytest_cache/
+*.tsbuildinfo
+.agents/
+.coverage
+htmlcov/
