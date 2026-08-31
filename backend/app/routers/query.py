@@ -46,6 +46,15 @@ async def query_rag_stream(
     user_id = user.id
     start_time = time.time()
 
+    # Step 0: Check Usage Limits
+    try:
+        await vector_svc.increment_query_count(user_id)
+    except Exception as exc:
+        if "Free tier limit reached" in str(exc):
+            raise HTTPException(status_code=429, detail=str(exc))
+        else:
+            logger.error(f"Usage limit check failed: {str(exc)}")
+
     # Step 1: Query embedding via Voyage AI (1024d)
     try:
         query_embedding = await embedding_svc.embed_query(request.query)

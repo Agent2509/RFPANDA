@@ -52,11 +52,11 @@ export function AuthForm({ mode }: AuthFormProps) {
     try {
       if (mode === 'login') {
         await signIn(email, password);
-        router.push('/');
+        router.push('/dashboard');
       } else {
         const data = await signUp(email, password);
         if (data.session) {
-          router.push('/');
+          router.push('/dashboard');
         } else {
           setSuccessMessage('Registration successful! You may now sign in.');
           setTimeout(() => {

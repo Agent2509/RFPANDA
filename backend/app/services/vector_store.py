@@ -180,6 +180,23 @@ class SupabaseVectorStore:
             logger.warning(f"Failed to touch document timestamps: {str(exc)}")
             return 0
 
+    async def increment_query_count(self, user_id: str) -> None:
+        """Executes increment_query_count RPC. Raises an exception if limit exceeded."""
+        rpc_url = f"{self.supabase_url}/rest/v1/rpc/increment_query_count"
+        client = await self._get_client()
+        payload = {"p_user_id": user_id}
+        try:
+            response = await client.post(rpc_url, json=payload, headers=self._get_headers())
+            if response.status_code != 200:
+                err_text = response.text
+                if "Free tier limit reached" in err_text:
+                    raise VectorStoreError("Free tier limit reached: You can only ask up to 50 questions.")
+                logger.error(f"increment_query_count HTTP {response.status_code}: {err_text}")
+                raise VectorStoreError(f"Usage tracking failed HTTP {response.status_code}")
+        except httpx.RequestError as exc:
+            logger.error(f"increment_query_count connection error: {str(exc)}")
+            raise VectorStoreError("Usage tracking network error.") from exc
+
     async def list_documents(self, user_id: str) -> List[Dict[str, Any]]:
         """
         Retrieves all documents owned by user_id from Supabase REST endpoint.

@@ -1,3 +1,4 @@
+import { RouteGuard } from "@/components/auth/RouteGuard";
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -13,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 font-sans">{children}</body>
+      <body className="min-h-screen bg-slate-950 font-sans"><RouteGuard>{children}</RouteGuard></body>
     </html>
   );
 }
