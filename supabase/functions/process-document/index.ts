@@ -4,7 +4,7 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { handleCors, jsonResponse } from "../_shared/cors.ts";
-import { getServiceRoleClient } from "../_shared/supabase.ts";
+import { getServiceRoleClient, getUserClient } from "../_shared/supabase.ts";
 import { LlamaParseClient } from "../_shared/llamaparse.ts";
 import { SemanticChunker } from "../_shared/chunker.ts";
 import { VoyageClient } from "../_shared/voyage.ts";
@@ -15,6 +15,30 @@ serve(async (req: Request) => {
   if (corsRes) return corsRes;
 
   try {
+    // Auth: Verify caller is authenticated or service_role
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader) {
+      return jsonResponse({ error: "Missing Authorization header" }, 401);
+    }
+
+    const isServiceRole = authHeader.includes(
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "__NONE__",
+    );
+
+    let authenticatedUserId: string | null = null;
+    if (!isServiceRole) {
+      const userClient = getUserClient(authHeader);
+      const {
+        data: { user },
+        error: userError,
+      } = await userClient.auth.getUser();
+
+      if (userError || !user) {
+        return jsonResponse({ error: "Invalid or expired session token" }, 401);
+      }
+      authenticatedUserId = user.id;
+    }
+
     const supabase = getServiceRoleClient();
     const body = await req.json().catch(() => ({}));
     const documentId = body.document_id || body.id || body.record?.id;
@@ -67,6 +91,11 @@ serve(async (req: Request) => {
         },
         200,
       );
+    }
+
+    // Verify the authenticated user owns this document
+    if (authenticatedUserId && doc.user_id !== authenticatedUserId) {
+      return jsonResponse({ error: "Document not found or unauthorized" }, 404);
     }
 
     // 2. Download file from Supabase Storage bucket 'rfp-documents'

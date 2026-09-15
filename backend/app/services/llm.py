@@ -61,6 +61,12 @@ class GroqLLMService:
             )
         return self._client
 
+    async def close(self):
+        """Closes the AsyncGroq client if initialized."""
+        if self._client is not None:
+            await self._client.close()
+            self._client = None
+
     def format_context_prompt(self, context_chunks: List[Dict[str, Any]]) -> str:
         """
         Formats retrieved context chunks into a structured Markdown prompt block.

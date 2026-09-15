@@ -171,16 +171,45 @@ async def test_fallback_parse_endpoint(
         "parser_used": "pdfjs_client_fallback"
     }
 
-    response = await async_client.post(
-        "/api/documents/fallback-parse",
-        json=payload,
-        headers=auth_headers
-    )
+    # Mock the vector store methods
+    from app.services.vector_store import get_vector_store
+    vector_svc = get_vector_store()
+    
+    # Save original methods
+    orig_get_doc = vector_svc.get_document
+    orig_update = vector_svc.update_document_status
+    orig_del_ins = vector_svc.delete_and_insert_chunks
+    
+    async def mock_get_document(doc_id, user_id):
+        return {"id": doc_id, "user_id": user_id, "metadata": {}}
+        
+    async def mock_update_status(*args, **kwargs):
+        return True
+        
+    async def mock_delete_insert(*args, **kwargs):
+        return len(kwargs.get("chunks", []))
+        
+    try:
+        vector_svc.get_document = mock_get_document
+        vector_svc.update_document_status = mock_update_status
+        vector_svc.delete_and_insert_chunks = mock_delete_insert
 
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "success"
-    assert data["document_id"] == "doc-fallback-uuid-1"
+        response = await async_client.post(
+            "/api/documents/fallback-parse",
+            json=payload,
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "processed"
+        assert data["document_id"] == "doc-fallback-uuid-1"
+        assert data["total_chunks"] > 0
+    finally:
+        # Restore original methods
+        vector_svc.get_document = orig_get_doc
+        vector_svc.update_document_status = orig_update
+        vector_svc.delete_and_insert_chunks = orig_del_ins
 
 
 @pytest.mark.asyncio

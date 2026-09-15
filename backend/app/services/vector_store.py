@@ -91,15 +91,13 @@ class SupabaseVectorStore:
         rpc_url = f"{self.supabase_url}/rest/v1/rpc/match_documents"
         client = await self._get_client()
 
-        # If multiple document IDs are provided, handle single or multiple
-        target_doc_id = filter_document_ids[0] if (filter_document_ids and len(filter_document_ids) == 1) else None
 
         payload: Dict[str, Any] = {
             "query_embedding": query_embedding,
             "match_threshold": match_threshold,
             "match_count": match_count,
             "filter_user_id": filter_user_id,
-            "filter_document_id": target_doc_id
+            "filter_document_ids": filter_document_ids
         }
 
         try:
@@ -127,10 +125,6 @@ class SupabaseVectorStore:
                 similarity = float(item.get("similarity", 0.0))
                 content = item.get("content", "")
 
-                # If multiple document_ids were passed in request, filter in application layer if RPC only accepts single filter_document_id
-                if filter_document_ids and len(filter_document_ids) > 1:
-                    if doc_id not in filter_document_ids:
-                        continue
 
                 formatted_chunks.append({
                     "chunk_id": str(chunk_id),
@@ -215,9 +209,94 @@ class SupabaseVectorStore:
             logger.error(f"Error fetching user documents: {str(exc)}")
             return []
 
+    async def get_document(self, document_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Fetches a single document by ID, verifying ownership via user_id.
+        Returns None if not found or unauthorized.
+        """
+        url = (
+            f"{self.supabase_url}/rest/v1/documents"
+            f"?id=eq.{document_id}&user_id=eq.{user_id}"
+            f"&select=id,user_id,name,storage_path,status,metadata"
+        )
+        client = await self._get_client()
+        try:
+            response = await client.get(url, headers=self._get_headers())
+            if response.status_code == 200:
+                rows = response.json()
+                return rows[0] if rows else None
+            return None
+        except Exception as exc:
+            logger.error(f"get_document error: {str(exc)}")
+            return None
+
+    async def update_document_status(
+        self,
+        document_id: str,
+        status: str,
+        error_message: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """Updates document status, error_message, and metadata via PostgREST PATCH."""
+        url = f"{self.supabase_url}/rest/v1/documents?id=eq.{document_id}"
+        client = await self._get_client()
+        body: Dict[str, Any] = {"status": status}
+        if error_message is not None:
+            body["error_message"] = error_message
+        if metadata is not None:
+            body["metadata"] = metadata
+        try:
+            response = await client.patch(url, json=body, headers=self._get_headers())
+            if response.status_code not in (200, 204):
+                logger.error(f"update_document_status HTTP {response.status_code}: {response.text}")
+                return False
+            return True
+        except Exception as exc:
+            logger.error(f"update_document_status error: {str(exc)}")
+            return False
+
+    async def delete_and_insert_chunks(
+        self,
+        document_id: str,
+        user_id: str,
+        chunks: List[Dict[str, Any]],
+        batch_size: int = 100,
+    ) -> int:
+        """
+        Deletes existing chunks for a document and inserts new ones via PostgREST.
+        Returns the number of chunks inserted.
+        """
+        client = await self._get_client()
+        headers = self._get_headers()
+
+        # Delete old chunks
+        delete_url = f"{self.supabase_url}/rest/v1/document_chunks?document_id=eq.{document_id}"
+        try:
+            await client.delete(delete_url, headers=headers)
+        except Exception as exc:
+            logger.warning(f"delete_and_insert_chunks delete error: {str(exc)}")
+
+        # Batch insert new chunks
+        insert_url = f"{self.supabase_url}/rest/v1/document_chunks"
+        inserted = 0
+        for i in range(0, len(chunks), batch_size):
+            batch = chunks[i : i + batch_size]
+            try:
+                response = await client.post(insert_url, json=batch, headers=headers)
+                if response.status_code in (200, 201):
+                    inserted += len(batch)
+                else:
+                    logger.error(f"Chunk insert batch error HTTP {response.status_code}: {response.text}")
+                    raise VectorStoreError(f"Chunk insert failed: HTTP {response.status_code}")
+            except httpx.RequestError as exc:
+                logger.error(f"Chunk insert network error: {str(exc)}")
+                raise VectorStoreError(f"Chunk insert network error: {str(exc)}") from exc
+
+        return inserted
+
+
 
 _vector_store_instance: Optional[SupabaseVectorStore] = None
-
 
 def get_vector_store() -> SupabaseVectorStore:
     """Singleton getter for SupabaseVectorStore."""

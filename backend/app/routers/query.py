@@ -8,7 +8,7 @@ import json
 import time
 import logging
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from app.auth import get_current_user, AuthenticatedUser
@@ -27,12 +27,19 @@ from app.services.llm import get_llm_service, GroqLLMService
 
 logger = logging.getLogger("apextender.query")
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+
 router = APIRouter(prefix="/api", tags=["RAG Query & Documents"])
 
 
 @router.post("/query")
+@limiter.limit("15/minute")
 async def query_rag_stream(
-    request: QueryRequest,
+    request: Request,
+    payload: QueryRequest,
     background_tasks: BackgroundTasks,
     user: AuthenticatedUser = Depends(get_current_user),
     embedding_svc: VoyageEmbeddingService = Depends(get_embedding_service),
@@ -57,7 +64,7 @@ async def query_rag_stream(
 
     # Step 1: Query embedding via Voyage AI (1024d)
     try:
-        query_embedding = await embedding_svc.embed_query(request.query)
+        query_embedding = await embedding_svc.embed_query(payload.query)
     except Exception as exc:
         logger.error(f"Failed to generate query embedding: {str(exc)}")
         raise HTTPException(
@@ -70,9 +77,9 @@ async def query_rag_stream(
         matched_chunks = await vector_svc.match_documents(
             query_embedding=query_embedding,
             filter_user_id=user_id,
-            filter_document_ids=request.document_ids,
-            match_threshold=request.similarity_threshold,
-            match_count=request.match_count
+            filter_document_ids=payload.document_ids,
+            match_threshold=payload.similarity_threshold,
+            match_count=payload.match_count
         )
     except Exception as exc:
         logger.error(f"Vector search failed: {str(exc)}")
@@ -119,9 +126,9 @@ async def query_rag_stream(
         token_count = 0
         try:
             async for token in llm_svc.stream_chat_completion(
-                query=request.query,
+                query=payload.query,
                 context_chunks=matched_chunks,
-                model=request.model
+                model=payload.model
             ):
                 token_count += 1
                 token_payload = json.dumps({"delta": token, "text": token})
@@ -131,7 +138,7 @@ async def query_rag_stream(
             elapsed_ms = round((time.time() - start_time) * 1000, 2)
             done_payload = json.dumps({
                 "finish_reason": "stop",
-                "model": request.model,
+                "model": payload.model,
                 "total_sources": len(matched_chunks),
                 "completion_tokens": token_count,
                 "total_time_ms": elapsed_ms
@@ -170,7 +177,9 @@ async def list_user_documents(
 
 
 @router.post("/documents/fallback-parse")
+@limiter.limit("5/minute")
 async def fallback_parse_ingest(
+    request: Request,
     payload: FallbackParseRequest,
     user: AuthenticatedUser = Depends(get_current_user),
     embedding_svc: VoyageEmbeddingService = Depends(get_embedding_service),
@@ -178,6 +187,7 @@ async def fallback_parse_ingest(
 ):
     """
     Fallback endpoint receiving structured text extracted by browser-side PDF.js.
+    Performs actual chunking, embedding, and storage — not a stub.
     """
     if not payload.extracted_text and not payload.pages:
         raise HTTPException(
@@ -185,9 +195,117 @@ async def fallback_parse_ingest(
             detail="No extracted text or pages provided in fallback payload."
         )
 
-    return {
-        "status": "success",
-        "document_id": payload.document_id,
-        "message": "Fallback text accepted for ingestion.",
-        "parser": payload.parser_used
-    }
+    # 1. Verify the user owns this document
+    doc = await vector_svc.get_document(payload.document_id, user.id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found or unauthorized."
+        )
+
+    # 2. Set status to processing
+    await vector_svc.update_document_status(payload.document_id, "processing")
+
+    try:
+        # 3. Assemble full text from pages or extracted_text
+        if payload.pages:
+            full_text = "\n\n".join(
+                f"--- Page {p.page_number} ---\n{p.text}" for p in payload.pages if p.text.strip()
+            )
+        else:
+            full_text = payload.extracted_text or ""
+
+        if not full_text.strip():
+            await vector_svc.update_document_status(
+                payload.document_id, "failed",
+                error_message="Fallback text was empty after assembly."
+            )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Fallback text was empty after assembly."
+            )
+
+        # 4. Chunk the text
+        from app.services.chunker import SemanticChunker
+        chunker = SemanticChunker(target_tokens=600, overlap_tokens=100, max_tokens=1000)
+        chunk_results = chunker.chunk_text(full_text)
+
+        if not chunk_results:
+            await vector_svc.update_document_status(
+                payload.document_id, "failed",
+                error_message="Fallback parser produced no valid text chunks."
+            )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Fallback parser produced 0 chunks."
+            )
+
+        # 5. Generate embeddings via Voyage AI
+        chunk_texts = [c.content for c in chunk_results]
+        embeddings = await embedding_svc.embed_documents(chunk_texts, batch_size=64)
+
+        if len(embeddings) != len(chunk_results):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Embedding count mismatch: expected {len(chunk_results)}, got {len(embeddings)}"
+            )
+
+        # 6. Build chunk rows and insert
+        chunk_rows = [
+            {
+                "document_id": doc["id"],
+                "user_id": doc["user_id"],
+                "chunk_index": cr.chunk_index,
+                "content": cr.content,
+                "embedding": embeddings[idx],
+                "token_count": cr.token_count,
+                "metadata": {
+                    **cr.metadata,
+                    "parser": payload.parser_used or "pdfjs_client_fallback",
+                },
+            }
+            for idx, cr in enumerate(chunk_results)
+        ]
+
+        inserted_count = await vector_svc.delete_and_insert_chunks(
+            document_id=payload.document_id,
+            user_id=user.id,
+            chunks=chunk_rows,
+        )
+
+        # 7. Update document status to processed
+        existing_meta = doc.get("metadata") or {}
+        await vector_svc.update_document_status(
+            payload.document_id,
+            "processed",
+            error_message=None,
+            metadata={
+                **existing_meta,
+                "total_chunks": len(chunk_results),
+                "processed_at": __import__("datetime").datetime.utcnow().isoformat(),
+                "parser": payload.parser_used or "pdfjs_client_fallback",
+                "fallback_ingested": True,
+            },
+        )
+
+        return {
+            "status": "processed",
+            "document_id": payload.document_id,
+            "total_chunks": inserted_count,
+            "parser": payload.parser_used or "pdfjs_client_fallback",
+            "source": "backend_fallback",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"Fallback parse ingestion failed: {str(exc)}")
+        await vector_svc.update_document_status(
+            payload.document_id, "failed",
+            error_message=f"Fallback ingestion error: {str(exc)}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Fallback ingestion failed: {str(exc)}"
+        )
+
