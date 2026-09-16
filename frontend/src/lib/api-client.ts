@@ -19,9 +19,8 @@ export interface StreamQueryOptions extends StreamQueryCallbacks {
 }
 
 export const DEFAULT_BACKEND_URL =
-  process.env.NEXT_PUBLIC_FASTAPI_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'http://localhost:8000';
+  'https://rfpanda-backend.onrender.com';
 
 /**
  * Executes a streaming RFP query directly against the FastAPI backend using SSE.
