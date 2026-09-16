@@ -72,6 +72,13 @@ def create_app() -> FastAPI:
 
     # Configure CORS
     origins = settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS]
+    
+    # Forcefully allow Vercel origins to prevent CORS blocking
+    if "https://rfpanda.vercel.app" not in origins:
+        origins.append("https://rfpanda.vercel.app")
+    if "http://localhost:3000" not in origins:
+        origins.append("http://localhost:3000")
+        
     # W3C CORS spec disallows credentials with wildcard origin
     use_credentials = "*" not in origins
     app.add_middleware(
