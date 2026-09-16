@@ -6,6 +6,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
 import { ChatMessage, SourceCitation } from '@/types';
 import {
   User,
@@ -47,119 +50,78 @@ export function MessageBubble({
    * Simple, secure client-side Markdown formatter for streaming answers.
    */
   const renderFormattedContent = (content: string) => {
-    if (!content && message.isStreaming) {
-      return (
-        <span className="inline-flex items-center gap-1.5 text-emerald-400 text-sm animate-pulse">
-          <Sparkles className="w-4 h-4 animate-spin" />
-          Analyzing RFP context & generating answer...
-        </span>
-      );
-    }
+    if (!content) return null;
 
-    // Split lines and format paragraphs, headers, bullet points, tables, code
-    const lines = content.split('\n');
-    const elements: React.ReactNode[] = [];
+    // Convert [[Doc: filename.pdf, p. X]] to markdown links for interception
+    // We encode the citation data into the hash of the URL: #cite|||filename.pdf|||X
+    const processedContent = content.replace(
+      /\[\[Doc:\s*(.*?),\s*p\.\s*(\d+)(?:\s*-\s*.*?)?\]\]/g,
+      '[Citation](#cite|||$1|||$2)'
+    );
 
-    lines.forEach((line, index) => {
-      // Inline citation tag replacer: [[Doc: filename, p. X]] or [Doc: filename, p. X]
-      const renderLineWithCitations = (text: string) => {
-        const citationRegex = /(\[\[?Doc:\s*([^,\]]+)(?:,\s*p\.\s*(\d+))?(?:\s*-\s*([^\]]+))?\]\]?)/g;
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-
-        while ((match = citationRegex.exec(text)) !== null) {
-          if (match.index > lastIndex) {
-            parts.push(text.substring(lastIndex, match.index));
-          }
-
-          const rawPill = match[1];
-          const fileName = match[2];
-          const pageNum = match[3] || '1';
-
-          parts.push(
-            <button
-              key={`citation-${match.index}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenCitationDrawer?.();
-              }}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-1 text-xs font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 rounded hover:bg-emerald-900 hover:text-emerald-100 transition-colors shadow-sm"
-              title={`View citation in ${fileName} (p. ${pageNum})`}
-            >
-              <FileText className="w-3 h-3 text-emerald-400" />
-              <span>{fileName.length > 20 ? fileName.substring(0, 18) + '...' : fileName}</span>
-              <span className="text-emerald-400 font-mono text-[10px]">p.{pageNum}</span>
-            </button>
-          );
-
-          lastIndex = citationRegex.lastIndex;
-        }
-
-        if (lastIndex < text.length) {
-          parts.push(text.substring(lastIndex));
-        }
-
-        return parts.length > 0 ? parts : text;
-      };
-
-      // Header level 3 ###
-      if (line.startsWith('### ')) {
-        elements.push(
-          <h4 key={index} className="text-base font-bold text-slate-100 mt-3 mb-1">
-            {line.replace('### ', '')}
-          </h4>
-        );
-      }
-      // Header level 2 ##
-      else if (line.startsWith('## ')) {
-        elements.push(
-          <h3 key={index} className="text-lg font-bold text-slate-100 mt-4 mb-1.5 text-emerald-400">
-            {line.replace('## ', '')}
-          </h3>
-        );
-      }
-      // Header level 1 #
-      else if (line.startsWith('# ')) {
-        elements.push(
-          <h2 key={index} className="text-xl font-bold text-slate-100 mt-4 mb-2">
-            {line.replace('# ', '')}
-          </h2>
-        );
-      }
-      // Bullet list item
-      else if (line.startsWith('- ') || line.startsWith('* ')) {
-        const bulletText = line.substring(2);
-        elements.push(
-          <li key={index} className="ml-4 list-disc text-slate-200 my-0.5">
-            {renderLineWithCitations(bulletText)}
-          </li>
-        );
-      }
-      // Numbered list item
-      else if (/^\d+\.\s/.test(line)) {
-        const numText = line.replace(/^\d+\.\s/, '');
-        elements.push(
-          <li key={index} className="ml-4 list-decimal text-slate-200 my-0.5">
-            {renderLineWithCitations(numText)}
-          </li>
-        );
-      }
-      // Empty line
-      else if (line.trim() === '') {
-        elements.push(<div key={index} className="h-2" />);
-      }
-      // Standard paragraph
-      else {
-        elements.push(
-          <p key={index} className="text-slate-200 leading-relaxed my-1">
-            {renderLineWithCitations(line)}
-          </p>
-        );
-      }
-    });
-
-    return <div className="space-y-0.5">{elements}</div>;
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ node, href, children, ...props }) => {
+            if (href?.startsWith('#cite|||')) {
+              const parts = href.split('|||');
+              const fileName = parts[1] || 'Unknown';
+              const pageNum = parts[2] || '1';
+              return (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onOpenCitationDrawer?.();
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-1 text-xs font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 rounded hover:bg-emerald-900 hover:text-emerald-100 transition-colors shadow-sm cursor-pointer align-middle"
+                  title={`View citation in ${fileName} (p. ${pageNum})`}
+                >
+                  <FileText className="w-3 h-3 text-emerald-400" />
+                  <span className="truncate max-w-[150px]">{fileName}</span>
+                  <span className="text-emerald-400 font-mono text-[10px]">p.{pageNum}</span>
+                </button>
+              );
+            }
+            return (
+              <a href={href} className="text-emerald-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props}>
+                {children}
+              </a>
+            );
+          },
+          table: ({ node, ...props }) => (
+            <div className="overflow-x-auto my-4">
+              <table className="min-w-full text-sm text-left text-slate-200 border border-slate-700 rounded-lg overflow-hidden" {...props} />
+            </div>
+          ),
+          thead: ({ node, ...props }) => <thead className="bg-slate-800/80 text-xs uppercase text-slate-400" {...props} />,
+          th: ({ node, ...props }) => <th className="px-4 py-3 border-b border-slate-700" {...props} />,
+          td: ({ node, ...props }) => <td className="px-4 py-3 border-b border-slate-700/60" {...props} />,
+          tr: ({ node, ...props }) => <tr className="hover:bg-slate-800/40" {...props} />,
+          p: ({ node, ...props }) => <p className="leading-relaxed my-2" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc ml-6 my-2" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal ml-6 my-2" {...props} />,
+          li: ({ node, ...props }) => <li className="my-1" {...props} />,
+          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-slate-100 mt-5 mb-3" {...props} />,
+          h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-slate-100 mt-4 mb-2" {...props} />,
+          h3: ({ node, ...props }) => <h3 className="text-lg font-bold text-slate-100 mt-3 mb-1.5 text-emerald-400" {...props} />,
+          h4: ({ node, ...props }) => <h4 className="text-base font-bold text-slate-100 mt-2 mb-1" {...props} />,
+          blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-emerald-500/50 pl-4 py-1 my-3 bg-slate-800/30 italic text-slate-300" {...props} />,
+          code: ({ node, inline, className, children, ...props }: any) => {
+            return inline ? (
+              <code className="bg-slate-800 text-emerald-300 px-1.5 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>
+            ) : (
+              <pre className="bg-slate-900 p-4 rounded-xl border border-slate-700 overflow-x-auto my-3">
+                <code className="text-slate-300 text-sm font-mono" {...props}>{children}</code>
+              </pre>
+            );
+          },
+        }}
+      >
+        {processedContent}
+      </ReactMarkdown>
+    );
   };
 
   return (
