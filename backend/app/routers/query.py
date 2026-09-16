@@ -279,11 +279,9 @@ async def fallback_parse_ingest(
     await vector_svc.update_document_status(payload.document_id, "fallback_processing")
 
     if payload.pages:
-        full_text = "
 
-".join(
-            f"--- Page {p.page_number} ---
-{p.text}" for p in payload.pages if p.text.strip()
+        full_text = "\n\n".join(
+            f"--- Page {p.page_number} ---\n{p.text}" for p in payload.pages if p.text.strip()
         )
     else:
         full_text = payload.extracted_text or ""
