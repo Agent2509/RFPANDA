@@ -37,7 +37,7 @@ export class VoyageClient {
 
   constructor(
     apiKeyOrOptions?: string | VoyageClientOptions,
-    model = "voyage-3-lite",
+    model = "voyage-3",
   ) {
     if (typeof apiKeyOrOptions === "string") {
       this.apiKey = apiKeyOrOptions;
@@ -49,7 +49,7 @@ export class VoyageClient {
     } else {
       const opts = apiKeyOrOptions || {};
       this.apiKey = opts.apiKey || Deno.env.get("VOYAGE_API_KEY") || "";
-      this.model = opts.model || "voyage-3-lite";
+      this.model = opts.model || "voyage-3";
       this.baseUrl = opts.baseUrl ||
         Deno.env.get("VOYAGE_API_URL") ||
         "https://api.voyageai.com/v1/embeddings";

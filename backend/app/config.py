@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # Voyage AI Configuration
     VOYAGE_API_KEY: str = Field(default="voyage-mock-api-key", description="Voyage AI API key")
     VOYAGE_API_URL: str = Field(default="https://api.voyageai.com/v1/embeddings", description="Voyage AI embeddings endpoint")
-    VOYAGE_MODEL: str = Field(default="voyage-3-lite", description="Voyage embedding model (1024d output)")
+    VOYAGE_MODEL: str = Field(default="voyage-3", description="Voyage embedding model (1024d output)")
     VOYAGE_MAX_RETRIES: int = Field(default=3, description="Maximum retry count on Voyage rate limits / 5xx")
     VOYAGE_TIMEOUT_SECONDS: float = Field(default=15.0, description="HTTP timeout for Voyage AI calls")
 
