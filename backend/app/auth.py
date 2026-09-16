@@ -84,61 +84,36 @@ async def get_current_user(
             )
 
     try:
-        # Decode and verify Supabase JWT
-        payload = jwt.decode(
-            token,
-            settings.SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
-            options={
-                "verify_exp": True,
-                "verify_signature": True,
-                "verify_aud": False  # Aud is checked manually below for flexible tenant validation
-            }
-        )
-
-        user_id: Optional[str] = payload.get("sub")
-        if not user_id:
+        from supabase import create_client
+        supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+        
+        # This securely calls the Supabase API to verify the token, handling both HS256 and new RS256 tokens seamlessly
+        user_response = supabase.auth.get_user(token)
+        
+        if not user_response or not user_response.user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing subject (sub) claim"
+                detail="Invalid token: User not found or token expired"
             )
-
-        # Check audience if present in token
-        token_aud = payload.get("aud")
-        if token_aud and token_aud not in ("authenticated", "test", "apex_tender"):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid token audience: {token_aud}"
-            )
-
-        email: str = payload.get("email", "")
-        role: str = payload.get("role", "authenticated")
-        user_metadata: Dict[str, Any] = payload.get("user_metadata", {})
+            
+        user = user_response.user
+        user_id = str(user.id)
+        email = user.email or ""
+        role = user.role or "authenticated"
+        user_metadata = user.user_metadata or {}
 
         return AuthenticatedUser(
-            id=str(user_id),
+            id=user_id,
             email=email,
             role=role,
             metadata=user_metadata
         )
 
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.PyJWTError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Authentication failed: {str(exc)}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     except Exception as exc:
         if isinstance(exc, HTTPException):
             raise exc
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Unexpected authentication error: {str(exc)}",
+            detail=f"Authentication failed: {str(exc)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
