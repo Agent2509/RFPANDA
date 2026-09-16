@@ -179,7 +179,8 @@ class VoyageEmbeddingService:
         self,
         texts: List[str],
         batch_size: int = 64,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        delay_between_batches: float = 0.0
     ) -> List[List[float]]:
         """
         Embeds a large list of document chunks in batches using input_type='document'.
@@ -189,6 +190,9 @@ class VoyageEmbeddingService:
             batch = texts[i:i + batch_size]
             batch_vectors = await self.create_embeddings(batch, input_type="document", model=model)
             all_embeddings.extend(batch_vectors)
+            if delay_between_batches > 0 and i + batch_size < len(texts):
+                import asyncio
+                await asyncio.sleep(delay_between_batches)
         return all_embeddings
 
 
