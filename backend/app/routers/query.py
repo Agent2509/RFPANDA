@@ -243,7 +243,7 @@ async def _process_fallback_ingestion_background(
             ]
             # Don't delete on incremental inserts, just insert
             if i == 0:
-                await vector_svc.delete_and_insert_chunks(document_id=document_id, chunks=chunk_rows)
+                await vector_svc.delete_and_insert_chunks(document_id=document_id, user_id=user_id, chunks=chunk_rows)
             else:
                 # Assuming delete_and_insert_chunks can just do an insert if we bypass delete
                 # Actually, let's just use the Supabase client directly to append
