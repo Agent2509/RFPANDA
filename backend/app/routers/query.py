@@ -241,13 +241,13 @@ async def _process_fallback_ingestion_background(
                 }
                 for idx in range(len(batch_vectors))
             ]
-            # Don't delete on incremental inserts, just insert
-            if i == 0:
-                await vector_svc.delete_and_insert_chunks(document_id=document_id, user_id=user_id, chunks=chunk_rows)
-            else:
-                # Assuming delete_and_insert_chunks can just do an insert if we bypass delete
-                # Actually, let's just use the Supabase client directly to append
-                await vector_svc.client.table("document_chunks").insert(chunk_rows).execute()
+            # Incremental insert directly via HTTP
+            client = await vector_svc._get_client()
+            insert_url = f"{vector_svc.supabase_url}/rest/v1/document_chunks"
+            resp = await client.post(insert_url, json=chunk_rows, headers=vector_svc._get_headers())
+            if resp.status_code not in (200, 201):
+                import logging
+                logging.getLogger("apextender.query").error(f"Incremental chunk insert failed: {resp.text}")
                 
             # Keep-alive ping and throttle
             if i + 4 < len(chunk_texts):
@@ -255,11 +255,7 @@ async def _process_fallback_ingestion_background(
                 await asyncio.sleep(65.0)
                 
         # Final status update
-        import datetime
-        await vector_svc._execute_write(
-            "UPDATE documents SET status = $1, error_message = NULL, updated_at = $2, processed_at = $2 WHERE id = $3",
-            "processed", datetime.datetime.utcnow().isoformat(), document_id
-        )
+        await vector_svc.update_document_status(document_id, "processed")
         return
 
         import datetime
