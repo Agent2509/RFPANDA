@@ -202,15 +202,35 @@ async def _process_fallback_ingestion_background(
             )
             return
 
+        # Keep-alive loop to prevent Render from spinning down the free instance
+        import httpx
+        async def ping_self():
+            try:
+                # Render provides the external URL in the RENDER_EXTERNAL_URL env var
+                import os
+                url = os.getenv("RENDER_EXTERNAL_URL", "http://127.0.0.0:8000")
+                async with httpx.AsyncClient() as client:
+                    await client.get(f"{url}/")
+            except:
+                pass
+        
+        # Ping immediately to ensure httpx is working
+        await ping_self()
+        
         chunk_texts = [c.content for c in chunk_results]
         
-        # Free Tier Throttling: 10k TPM limit means we can only do ~15 chunks (9k tokens) per minute
-        # We will batch 15 chunks and wait 62 seconds between batches.
-        embeddings = await embedding_svc.embed_documents(
-            chunk_texts, 
-            batch_size=4, 
-            delay_between_batches=65.0
-        )
+        # Embed with manual loop so we can ping ourselves every batch to keep Render alive!
+        all_embeddings = []
+        for i in range(0, len(chunk_texts), 4):
+            batch = chunk_texts[i:i + 4]
+            batch_vectors = await embedding_svc.create_embeddings(batch, input_type="document", model=None)
+            all_embeddings.extend(batch_vectors)
+            
+            if i + 4 < len(chunk_texts):
+                await ping_self()
+                await asyncio.sleep(65.0)
+                
+        embeddings = all_embeddings
 
         if len(embeddings) != len(chunk_results):
             await vector_svc.update_document_status(
