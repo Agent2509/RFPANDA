@@ -208,7 +208,7 @@ async def _process_fallback_ingestion_background(
             try:
                 # Render provides the external URL in the RENDER_EXTERNAL_URL env var
                 import os
-                url = os.getenv("RENDER_EXTERNAL_URL", "http://127.0.0.0:8000")
+                url = os.getenv("RENDER_EXTERNAL_URL", "https://rfpanda-backend.onrender.com")
                 async with httpx.AsyncClient() as client:
                     await client.get(f"{url}/")
             except:
