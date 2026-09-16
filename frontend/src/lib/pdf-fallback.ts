@@ -156,7 +156,7 @@ export async function executeFallbackIngestion(
   const token = options.supabaseToken || sessionData.session?.access_token || '';
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://rfpanda-backend.onrender.com';
-  const endpoint = `${backendUrl.replace(/\/$/, '')}/api/query/documents/fallback-parse`;
+  const endpoint = `${backendUrl.replace(/\/$/, '')}/api/documents/fallback-parse`;
 
   const payload = {
     document_id: documentId,
