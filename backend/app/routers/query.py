@@ -208,8 +208,8 @@ async def _process_fallback_ingestion_background(
         # We will batch 15 chunks and wait 62 seconds between batches.
         embeddings = await embedding_svc.embed_documents(
             chunk_texts, 
-            batch_size=15, 
-            delay_between_batches=62.0
+            batch_size=8, 
+            delay_between_batches=65.0
         )
 
         if len(embeddings) != len(chunk_results):
