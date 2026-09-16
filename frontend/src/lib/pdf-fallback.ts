@@ -155,7 +155,8 @@ export async function executeFallbackIngestion(
   const { data: sessionData } = await supabase.auth.getSession();
   const token = options.supabaseToken || sessionData.session?.access_token || '';
 
-  const edgeFunctionEndpoint = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/ingest-fallback-text`;
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://rfpanda-backend.onrender.com';
+  const endpoint = `${backendUrl.replace(/\/$/, '')}/api/query/documents/fallback-parse`;
 
   const payload = {
     document_id: documentId,
@@ -165,7 +166,7 @@ export async function executeFallbackIngestion(
     parser_used: 'pdfjs_client_fallback',
   };
 
-  const response = await fetch(edgeFunctionEndpoint, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
