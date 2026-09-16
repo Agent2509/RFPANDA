@@ -36,8 +36,8 @@ class QueryRequest(BaseModel):
         description="Minimum cosine similarity cutoff for chunk retrieval (0.0 to 1.0)"
     )
     model: str = Field(
-        default="llama-3.3-70b-versatile",
-        description="Target Groq LLM model: llama-3.3-70b-versatile | llama-3.1-8b-instant"
+        default="openai/gpt-oss-120b",
+        description="Target Groq LLM model: openai/gpt-oss-120b | openai/gpt-oss-20b"
     )
 
     model_config = ConfigDict(extra="ignore")

@@ -266,7 +266,7 @@ export function MessageBubble({
         {/* Execution Performance Summary */}
         {isAssistant && message.summary && (
           <div className="mt-2 text-[10px] text-slate-500 font-mono flex items-center gap-2">
-            <span>Model: {message.summary.model || 'llama-3.3-70b-versatile'}</span>
+            <span>Model: {message.summary.model || 'openai/gpt-oss-120b'}</span>
             <span>•</span>
             <span>Tokens: {message.summary.completion_tokens || 0}</span>
             <span>•</span>

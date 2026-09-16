@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     # Groq Cloud Configuration
     GROQ_API_KEY: str = Field(default="groq-mock-api-key", description="Groq Cloud API key")
     GROQ_API_URL: str = Field(default="https://api.groq.com/openai/v1", description="Groq Cloud base URL")
-    GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile", description="Default Groq LLM model")
-    GROQ_FALLBACK_MODEL: str = Field(default="llama-3.1-8b-instant", description="Fast fallback Groq LLM model")
+    GROQ_MODEL: str = Field(default="openai/gpt-oss-120b", description="Default Groq LLM model")
+    GROQ_FALLBACK_MODEL: str = Field(default="openai/gpt-oss-20b", description="Fast fallback Groq LLM model")
     GROQ_TIMEOUT_SECONDS: float = Field(default=30.0, description="Timeout for Groq streaming responses")
 
     # RAG Search & Similarity Thresholds
