@@ -18,7 +18,7 @@ export function useRagQuery() {
 
   // Query Settings
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
-  const [matchThreshold, setMatchThreshold] = useState<number>(0.25);
+  const [matchThreshold, setMatchThreshold] = useState<number>(0.15);
   const [topK, setTopK] = useState<number>(5);
   const [model, setModel] = useState<string>('llama-3.3-70b-versatile');
 

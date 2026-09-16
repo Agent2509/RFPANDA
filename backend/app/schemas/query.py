@@ -30,7 +30,7 @@ class QueryRequest(BaseModel):
         description="Maximum number of relevant chunks to retrieve from pgvector"
     )
     similarity_threshold: float = Field(
-        default=0.25,
+        default=0.15,
         ge=0.0,
         le=1.0,
         description="Minimum cosine similarity cutoff for chunk retrieval (0.0 to 1.0)"

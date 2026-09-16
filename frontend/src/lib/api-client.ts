@@ -54,7 +54,7 @@ export async function streamRfpQuery(
         query: request.query,
         document_ids: request.document_ids && request.document_ids.length > 0 ? request.document_ids : null,
         match_count: request.match_count ?? 5,
-        similarity_threshold: request.similarity_threshold ?? 0.25,
+        similarity_threshold: request.similarity_threshold ?? 0.15,
         model: request.model ?? 'llama-3.3-70b-versatile',
       }),
       signal: options.signal,
