@@ -64,7 +64,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-semibold text-stone-700 truncate max-w-[150px]">
                   {user.email}
                 </span>
-                <span className="text-[10px] text-emerald-600 font-mono">Tenant</span>
+                <span className="text-[10px] text-emerald-600 font-mono">Online</span>
               </div>
 
               <div className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs">

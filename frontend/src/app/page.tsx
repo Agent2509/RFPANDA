@@ -32,14 +32,14 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-50 via-[#FAFAF8] to-[#FAFAF8] -z-10"></div>
           
           <div className="mb-6 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-             <Zap className="mr-2 h-4 w-4" /> v2.0 Production Grade RAG
+             <Zap className="mr-2 h-4 w-4" /> AI-Powered Document Search
           </div>
 
           <h2 className="max-w-4xl text-4xl font-extrabold tracking-tight text-stone-900 sm:text-5xl md:text-6xl lg:text-7xl">
-            Analyze RFPs <span className="text-emerald-600">10x Faster</span> with AI.
+            Understand Your Docs <span className="text-emerald-600">Instantly</span> with AI.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-500 md:text-xl">
-            Upload massive Request for Proposal (RFP) documents and instantly extract insights, SLAs, and technical requirements with zero hallucinations. Built for enterprise sales teams.
+            Upload any document — PDFs, notes, research papers — and get instant AI-powered answers with exact page citations. No hallucinations, just facts.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <Link href="/login">
@@ -50,7 +50,7 @@ export default function LandingPage() {
           </div>
           
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-600" /> Free Tier: 3 PDFs / month</span>
+            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-600" /> Free to Use</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-600" /> No Credit Card Required</span>
           </div>
         </section>
@@ -61,22 +61,22 @@ export default function LandingPage() {
               <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
                 <Search className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-bold text-stone-900 mb-2">Vector-Powered RAG</h3>
-              <p className="text-stone-500">Instantly search thousands of pages using Voyage AI dense embeddings and hybrid retrieval.</p>
+              <h3 className="text-xl font-bold text-stone-900 mb-2">Smart Search</h3>
+              <p className="text-stone-500">Instantly search through hundreds of pages to find exactly what you need.</p>
             </div>
             <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-lg shadow-stone-200/60 border border-stone-100">
               <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
                 <span className="text-3xl">🐼</span>
               </div>
               <h3 className="text-xl font-bold text-stone-900 mb-2">Zero Hallucinations</h3>
-              <p className="text-stone-500">Our ultra-strict Llama-3 AI guarantees answers are strictly sourced from your uploaded documents, preventing liability.</p>
+              <p className="text-stone-500">Every answer is strictly sourced from your actual documents — no made-up information, ever.</p>
             </div>
             <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-lg shadow-stone-200/60 border border-stone-100">
               <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
                 <FileText className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-bold text-stone-900 mb-2">Page-Level Citations</h3>
-              <p className="text-stone-500">Every claim is backed by exact source references and bounding-box page citations for human review.</p>
+              <p className="text-stone-500">Every answer shows exactly which page and section it came from, so you can verify it yourself.</p>
             </div>
           </div>
         </section>

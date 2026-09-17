@@ -30,10 +30,10 @@ interface ChatInterfaceProps {
 }
 
 const QUICK_PROMPTS = [
-  'What are the SLA penalty terms and uptime guarantees?',
-  'Summarize data security, encryption & GDPR compliance requirements.',
-  'List all mandatory pricing schedules and payment milestones.',
-  'Identify required technical certifications and vendor qualifications.',
+  'Summarize the key points of this document.',
+  'What are the most important takeaways?',
+  'List all the deadlines or dates mentioned.',
+  'Explain the main requirements in simple terms.',
 ];
 
 export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps) {
@@ -99,14 +99,14 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
           </div>
           <div>
             <h2 className="text-sm font-bold text-stone-800 flex items-center gap-2">
-              RFP Assistant
+              AI Assistant
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/60 font-mono font-medium">
                 SSE Direct Stream
               </span>
             </h2>
             <p className="text-xs text-stone-500">
               {selectedDocIds.length === 0
-                ? 'Grounded search across all tenant RFP documents'
+                ? 'Searching across all your uploaded documents'
                 : `Scoped to ${selectedDocIds.length} document${selectedDocIds.length > 1 ? 's' : ''}: ${scopedDocNames.join(', ')}`}
             </p>
           </div>
@@ -218,16 +218,16 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               <Sparkles className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-stone-800">Ask Anything About Your RFPs</h3>
+              <h3 className="text-lg font-bold text-stone-800">Ask Anything About Your Docs</h3>
               <p className="text-xs text-stone-500 mt-1">
-                RFPanda performs high-precision semantic search over your uploaded proposal documents and streams grounded answers with page-level citations.
+                Upload any document and ask questions — get instant answers with exact page citations.
               </p>
             </div>
 
             {/* Quick Prompt Suggestions */}
             <div className="w-full text-left pt-3">
               <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-2">
-                Suggested Analyst Queries:
+                Try asking:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {QUICK_PROMPTS.map((prompt, idx) => (
@@ -267,8 +267,8 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
             onKeyDown={handleKeyDown}
             placeholder={
               documents.length === 0
-                ? 'Upload an RFP document above to enable querying...'
-                : 'Ask a specific question about clauses, pricing, SLAs, or technical specs (Enter to submit)...'
+                ? 'Upload a document first to start asking questions...'
+                : 'Ask anything about your documents... (Enter to send)'
             }
             disabled={documents.length === 0 || isStreaming}
             className="w-full p-3.5 pr-28 bg-stone-100/80 border border-stone-300 rounded-xl text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-all disabled:opacity-50"
