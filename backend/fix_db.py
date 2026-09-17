@@ -1,10 +1,9 @@
-import os
 import requests
 
 SUPABASE_URL = "https://iblmxloizfpxmucypquv.supabase.co"
 SUPABASE_KEY = "sb_secret_zSYRfcAOjwdwnVwu9VoRgw_rbafuTBh"
 
-url = f"{SUPABASE_URL}/rest/v1/documents?status=eq.processing"
+url = f"{SUPABASE_URL}/rest/v1/documents?status=eq.failed"
 headers = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -14,7 +13,7 @@ headers = {
 
 data = {
     "status": "awaiting_fallback_parse",
-    "error_message": "Recovered from Edge Function Timeout"
+    "error_message": "Ready to track live!"
 }
 
 resp = requests.patch(url, headers=headers, json=data)

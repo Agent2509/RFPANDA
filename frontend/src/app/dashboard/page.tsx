@@ -14,14 +14,11 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { MemoryIndicator } from '@/components/system/MemoryIndicator';
 import { Button } from '@/components/ui';
 import {
-  ShieldCheck,
   LogOut,
   LogIn,
   User,
-  Layers,
-  Sparkles,
-  ExternalLink,
-  Info,
+  Menu,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -39,28 +36,19 @@ export default function DashboardPage() {
   } = useDocuments();
 
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.08),rgba(255,255,255,0))]">
-      {/* Top Enterprise Navigation Bar */}
-      <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
-        {/* Brand & Tagline */}
+    <div className="min-h-screen flex flex-col bg-[#FAFAF8] text-stone-900 font-sans">
+      {/* Top Nav Bar */}
+      <header className="h-14 border-b border-stone-200 bg-white/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+        {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-black">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-black tracking-tight text-white font-mono">
-                RFPANDA <span className="text-emerald-400 font-sans font-bold text-xs">v2.0</span>
-              </h1>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800/80 text-emerald-300">
-                Production RAG
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
-              Free-Tier-Proof Enterprise Proposal Engine (Voyage 1024d + Groq Llama 3)
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🐼</span>
+            <h1 className="text-lg font-bold tracking-tight text-stone-900">
+              RFPANDA <span className="text-emerald-600 font-normal text-xs ml-1">v2.0</span>
+            </h1>
           </div>
         </div>
 
@@ -71,48 +59,81 @@ export default function DashboardPage() {
 
           {/* User Auth Section */}
           {!authLoading && user ? (
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
+            <div className="flex items-center gap-3 pl-3 border-l border-stone-200">
               <div className="hidden md:flex flex-col text-right">
-                <span className="text-xs font-semibold text-slate-200 truncate max-w-[150px]">
+                <span className="text-xs font-semibold text-stone-700 truncate max-w-[150px]">
                   {user.email}
                 </span>
-                <span className="text-[10px] text-emerald-400 font-mono">Tenant Authenticated</span>
+                <span className="text-[10px] text-emerald-600 font-mono">Tenant</span>
               </div>
 
-              <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs">
                 {user.email ? user.email.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
               </div>
 
               <button
                 onClick={signOut}
                 title="Sign out"
-                className="p-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-400 hover:text-rose-400 hover:border-rose-800 hover:bg-rose-950/40 transition-colors"
+                className="p-1.5 rounded-full border border-stone-200 bg-stone-50 text-stone-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : !authLoading ? (
             <Link href="/login">
-              <Button size="sm" variant="primary" className="text-xs flex items-center gap-1.5">
+              <Button size="sm" variant="primary" className="text-xs flex items-center gap-1.5 rounded-full">
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Sign In</span>
               </Button>
             </Link>
           ) : null}
+
+          {/* Sidebar Toggle */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition-colors ml-2"
+            aria-label="Open sidebar"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
-      {/* Main Responsive Grid Layout */}
-      <main className="flex-1 p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1800px] w-full mx-auto overflow-hidden">
-        {/* Left Column: Direct Upload Dropzone & Document Library (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-5 h-[calc(100vh-6.5rem)] overflow-hidden">
-          {/* Direct Storage Upload Dropzone */}
+      {/* Main Area */}
+      <main className="flex-1 w-full max-w-4xl mx-auto p-4 lg:p-6 flex flex-col h-[calc(100vh-3.5rem)]">
+        <ChatInterface documents={documents} selectedDocIds={selectedDocIds} />
+      </main>
+
+      {/* Slide-out Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-40 transition-opacity sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Slide-out Sidebar Panel */}
+      <div 
+        className={`fixed top-0 left-0 w-80 h-full bg-white z-50 shadow-2xl rounded-r-2xl overflow-hidden transition-transform duration-300 ease-in-out flex flex-col ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+          <h2 className="font-semibold text-stone-800">Documents</h2>
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 rounded-full hover:bg-stone-200 text-stone-500 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
           <div className="flex-shrink-0">
             <UploadDropzone onUploadSuccess={refreshDocuments} />
           </div>
 
-          {/* Document Management Library */}
-          <div className="flex-1 min-h-0">
+          <div className="flex-1">
             <DocumentList
               documents={documents}
               loading={docsLoading}
@@ -127,12 +148,7 @@ export default function DashboardPage() {
             />
           </div>
         </div>
-
-        {/* Right Column: Direct-to-FastAPI SSE Streaming Chat Workspace (7 cols) */}
-        <div className="lg:col-span-7 h-[calc(100vh-6.5rem)]">
-          <ChatInterface documents={documents} selectedDocIds={selectedDocIds} />
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

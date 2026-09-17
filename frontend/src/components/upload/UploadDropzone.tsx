@@ -221,14 +221,14 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
   };
 
   return (
-    <div className="w-full bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
+    <div className="w-full bg-white/60 border border-stone-200 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider flex items-center gap-2">
+            <UploadCloud className="w-4 h-4 text-emerald-600" />
             Upload RFP Document
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-stone-500 mt-0.5">
             Direct-to-storage upload bypassing Vercel's 4.5MB limit (Up to 50MB supported)
           </p>
         </div>
@@ -242,10 +242,10 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
         onClick={() => fileInputRef.current?.click()}
         className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
           isDragging
-            ? 'border-emerald-500 bg-emerald-950/20'
+            ? 'border-emerald-500 bg-emerald-50'
             : selectedFile
-            ? 'border-slate-700 bg-slate-850/50'
-            : 'border-slate-800 hover:border-slate-700 hover:bg-slate-850/30'
+            ? 'border-stone-300 bg-stone-50/50'
+            : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50/30'
         }`}
       >
         <input
@@ -258,25 +258,25 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
 
         {!selectedFile ? (
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 mb-3 group-hover:text-emerald-400">
+            <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-500 mb-3 group-hover:text-emerald-600">
               <UploadCloud className="w-6 h-6" />
             </div>
-            <p className="text-sm font-medium text-slate-200">
-              Drag & drop your RFP here, or <span className="text-emerald-400 font-semibold underline">browse</span>
+            <p className="text-sm font-medium text-stone-700">
+              Drag & drop your RFP here, or <span className="text-emerald-600 font-semibold underline">browse</span>
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-stone-400 mt-1">
               Supports large PDFs, DOCX, TXT, and Markdown files
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-between bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+          <div className="flex items-center justify-between bg-stone-100/80 p-3 rounded-2xl border border-stone-300">
             <div className="flex items-center gap-3 overflow-hidden text-left">
-              <div className="w-10 h-10 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-emerald-400" />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center flex-shrink-0">
+                <FileText className="w-5 h-5 text-emerald-600" />
               </div>
               <div className="truncate">
-                <p className="text-sm font-semibold text-slate-100 truncate">{selectedFile.name}</p>
-                <p className="text-xs text-slate-400">{formatFileSize(selectedFile.size)}</p>
+                <p className="text-sm font-semibold text-stone-800 truncate">{selectedFile.name}</p>
+                <p className="text-xs text-stone-500">{formatFileSize(selectedFile.size)}</p>
               </div>
             </div>
             <button
@@ -285,7 +285,7 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
                 e.stopPropagation();
                 setSelectedFile(null);
               }}
-              className="p-1 text-slate-400 hover:text-slate-200 rounded-md hover:bg-slate-700"
+              className="p-1 text-stone-500 hover:text-stone-700 rounded-md hover:bg-stone-200"
             >
               <X className="w-4 h-4" />
             </button>
@@ -296,16 +296,16 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
       {/* Progress Bar & Status */}
       {isUploading && (
         <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-300">
+          <div className="flex items-center justify-between text-xs text-stone-600">
             <span className="flex items-center gap-1.5 font-medium">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
               {uploadStatus || 'Uploading...'}
             </span>
-            <span className="font-semibold text-emerald-400">{progress}%</span>
+            <span className="font-semibold text-emerald-600">{progress}%</span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-1.5 transition-all duration-300 ease-out rounded-full"
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-1.5 transition-all duration-300 ease-out rounded-full"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -314,15 +314,15 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
 
       {/* Error / Success Messages */}
       {errorMessage && (
-        <div className="mt-3 p-3 rounded-lg bg-rose-950/50 border border-rose-800/50 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+        <div className="mt-3 p-3 rounded-2xl bg-rose-50 border border-rose-200/50 text-rose-700 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="mt-3 p-3 rounded-lg bg-emerald-950/50 border border-emerald-800/50 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="mt-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}

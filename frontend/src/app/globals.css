@@ -4,13 +4,12 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 60 20% 98%;
+    --foreground: 20 14% 4%;
   }
 
   body {
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-emerald-900 selection:text-emerald-100;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    @apply bg-[#FAFAF8] text-stone-800 antialiased selection:bg-emerald-100 selection:text-emerald-900;
   }
 }
 
@@ -25,10 +24,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(168, 162, 158, 0.3);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(168, 162, 158, 0.5);
 }
+
+@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+.sidebar-enter { animation: slideIn 0.3s ease-out forwards; }
+.sidebar-exit { animation: slideOut 0.2s ease-in forwards; }
+
+.sidebar-overlay { @apply fixed inset-0 bg-black/20 backdrop-blur-sm z-40; }

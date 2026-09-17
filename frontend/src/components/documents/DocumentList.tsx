@@ -71,16 +71,16 @@ export function DocumentList({
   };
 
   return (
-    <div className="w-full flex flex-col h-full bg-slate-900/60 border border-slate-800 rounded-2xl shadow-lg backdrop-blur-sm overflow-hidden">
+    <div className="w-full flex flex-col h-full bg-white/60 border border-stone-200 rounded-2xl shadow-lg backdrop-blur-sm overflow-hidden">
       {/* Header & Controls */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900/90 space-y-3">
+      <div className="p-4 border-b border-stone-200 bg-white/90 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FolderArchive className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider">
+            <FolderArchive className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider">
               Document Library
             </h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 font-semibold">
               {documents.length}
             </span>
           </div>
@@ -91,17 +91,17 @@ export function DocumentList({
                 size="sm"
                 variant="ghost"
                 onClick={handleSelectAll}
-                className="text-xs py-1 px-2 text-slate-300 hover:text-white flex items-center gap-1"
+                className="text-xs py-1 px-2 text-stone-600 hover:text-stone-900 flex items-center gap-1"
                 title={selectedDocIds.length === readyDocuments.length ? 'Deselect all' : 'Select all ready documents'}
               >
                 {selectedDocIds.length === readyDocuments.length && readyDocuments.length > 0 ? (
                   <>
-                    <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                    <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                     All ({selectedDocIds.length})
                   </>
                 ) : (
                   <>
-                    <Square className="w-3.5 h-3.5 text-slate-500" />
+                    <Square className="w-3.5 h-3.5 text-stone-400" />
                     Scope ({selectedDocIds.length}/{readyDocuments.length})
                   </>
                 )}
@@ -111,37 +111,37 @@ export function DocumentList({
             <button
               onClick={onRefresh}
               title="Refresh document statuses"
-              className="p-1.5 rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors"
+              className="p-1.5 rounded-full border border-stone-300 bg-stone-100/60 text-stone-500 hover:text-stone-700 hover:bg-stone-200 transition-colors"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
             </button>
           </div>
         </div>
 
         {/* Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search documents by title..."
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-800/60 border border-slate-700/80 rounded-lg text-slate-200 placeholder-slate-500 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full pl-9 pr-3 py-1.5 bg-stone-100/60 border border-stone-300/80 rounded-2xl text-stone-700 placeholder-stone-400 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
         </div>
       </div>
 
       {/* Fallback Parsing Active Banner */}
       {parsingDocId && (
-        <div className="p-3 bg-amber-950/60 border-b border-amber-800/60 text-amber-200 text-xs space-y-2">
+        <div className="p-3 bg-amber-50 border-b border-amber-200/60 text-amber-200 text-xs space-y-2">
           <div className="flex items-center justify-between font-semibold">
             <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
               {parseProgress.step || 'Running client-side PDF parser...'}
             </span>
             <span>{parseProgress.percent}%</span>
           </div>
-          <div className="w-full bg-slate-900 rounded-full h-1 overflow-hidden">
+          <div className="w-full bg-white rounded-full h-1 overflow-hidden">
             <div
               className="bg-amber-400 h-1 transition-all duration-200 rounded-full"
               style={{ width: `${parseProgress.percent}%` }}
@@ -153,19 +153,19 @@ export function DocumentList({
       {/* Document Items List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
         {loading && documents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500 space-y-2">
-            <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+          <div className="flex flex-col items-center justify-center py-12 text-stone-400 space-y-2">
+            <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
             <p className="text-xs">Loading document repository...</p>
           </div>
         ) : filteredDocuments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center p-4">
-            <div className="w-10 h-10 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500 mb-2">
+            <div className="w-10 h-10 rounded-full bg-stone-100/80 flex items-center justify-center text-stone-400 mb-2">
               <FileQuestion className="w-5 h-5" />
             </div>
-            <p className="text-sm font-semibold text-slate-300">
+            <p className="text-sm font-semibold text-stone-600">
               {searchQuery ? 'No matching documents' : 'No documents uploaded yet'}
             </p>
-            <p className="text-xs text-slate-500 mt-1 max-w-[200px]">
+            <p className="text-xs text-stone-400 mt-1 max-w-[200px]">
               {searchQuery
                 ? 'Try adjusting your search keywords.'
                 : 'Upload your first RFP document above to begin asking questions.'}
@@ -189,13 +189,13 @@ export function DocumentList({
 
       {/* Footer summary */}
       {documents.length > 0 && (
-        <div className="p-2.5 px-4 bg-slate-950/60 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+        <div className="p-2.5 px-4 bg-[#FAFAF8]/60 border-t border-stone-200 text-[11px] text-stone-500 flex items-center justify-between">
           <span>
             {selectedDocIds.length === 0
               ? 'Query scope: All tenant documents'
               : `Query scope: ${selectedDocIds.length} selected document${selectedDocIds.length > 1 ? 's' : ''}`}
           </span>
-          <span className="text-slate-500">
+          <span className="text-stone-400">
             {readyDocuments.length} ready / {documents.length} total
           </span>
         </div>

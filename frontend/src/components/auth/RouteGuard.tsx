@@ -39,7 +39,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-950 text-emerald-400">
+      <div className="flex h-screen w-full items-center justify-center bg-[#FAFAF8] text-emerald-600">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );

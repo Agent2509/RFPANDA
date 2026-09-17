@@ -8,8 +8,10 @@ import { AuthForm } from '@/components/auth/AuthForm';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.15),rgba(255,255,255,0))]">
-      <AuthForm mode="login" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAF8] font-sans">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-stone-200/60 p-8 border border-stone-100">
+        <AuthForm mode="login" />
+      </div>
     </div>
   );
 }

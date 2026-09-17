@@ -90,21 +90,21 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
     .map((d) => d.name);
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/60 border border-slate-800 rounded-2xl shadow-xl backdrop-blur-sm overflow-hidden">
+    <div className="flex flex-col h-full bg-white/60 border border-stone-200 rounded-2xl shadow-xl backdrop-blur-sm overflow-hidden">
       {/* Top Header Bar */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between flex-wrap gap-3">
+      <div className="p-4 border-b border-stone-200 bg-white/90 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-600 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
             <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-stone-800 flex items-center gap-2">
               RFP Assistant
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/60 font-mono font-medium">
                 SSE Direct Stream
               </span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-500">
               {selectedDocIds.length === 0
                 ? 'Grounded search across all tenant RFP documents'
                 : `Scoped to ${selectedDocIds.length} document${selectedDocIds.length > 1 ? 's' : ''}: ${scopedDocNames.join(', ')}`}
@@ -117,10 +117,10 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
           <button
             type="button"
             onClick={() => setShowSettings(!showSettings)}
-            className={`p-2 rounded-lg border text-xs flex items-center gap-1.5 transition-colors ${
+            className={`p-2 rounded-full border text-xs flex items-center gap-1.5 transition-colors ${
               showSettings
-                ? 'bg-emerald-950 border-emerald-700 text-emerald-300'
-                : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white'
+                ? 'bg-emerald-50 border-emerald-700 text-emerald-700'
+                : 'bg-stone-100/80 border-stone-300 text-stone-600 hover:text-stone-900'
             }`}
             title="Adjust RAG parameters (similarity threshold, top-k, model)"
           >
@@ -134,9 +134,9 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               size="sm"
               variant="outline"
               onClick={() => setIsCitationDrawerOpen(true)}
-              className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-emerald-800/60 text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/60"
+              className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-emerald-200/60 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/60"
             >
-              <Layers className="w-3.5 h-3.5 text-emerald-400" />
+              <Layers className="w-3.5 h-3.5 text-emerald-600" />
               <span>Citations ({currentSources.length})</span>
             </Button>
           )}
@@ -145,7 +145,7 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
             <button
               onClick={clearMessages}
               title="Clear conversation"
-              className="p-2 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-400 hover:text-rose-400 hover:border-rose-800 hover:bg-rose-950/40 transition-colors"
+              className="p-2 rounded-full border border-stone-300 bg-stone-100/80 text-stone-500 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -155,12 +155,12 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
 
       {/* Expandable Query Settings Drawer */}
       {showSettings && (
-        <div className="p-4 bg-slate-850 border-b border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs animate-in slide-in-from-top-2 duration-200">
+        <div className="p-4 bg-stone-50 border-b border-stone-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs animate-in slide-in-from-top-2 duration-200">
           {/* Similarity Threshold */}
           <div className="space-y-1.5">
-            <div className="flex justify-between text-slate-300 font-semibold">
+            <div className="flex justify-between text-stone-600 font-semibold">
               <span>Similarity Threshold:</span>
-              <span className="text-emerald-400 font-mono font-bold">{matchThreshold}</span>
+              <span className="text-emerald-600 font-mono font-bold">{matchThreshold}</span>
             </div>
             <input
               type="range"
@@ -171,14 +171,14 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               onChange={(e) => setMatchThreshold(parseFloat(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-            <p className="text-[10px] text-slate-500">Lower = broader context; Higher = strict relevance</p>
+            <p className="text-[10px] text-stone-400">Lower = broader context; Higher = strict relevance</p>
           </div>
 
           {/* Top-K Chunks */}
           <div className="space-y-1.5">
-            <div className="flex justify-between text-slate-300 font-semibold">
+            <div className="flex justify-between text-stone-600 font-semibold">
               <span>Top-K Context Chunks:</span>
-              <span className="text-emerald-400 font-mono font-bold">{topK}</span>
+              <span className="text-emerald-600 font-mono font-bold">{topK}</span>
             </div>
             <input
               type="range"
@@ -189,23 +189,23 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               onChange={(e) => setTopK(parseInt(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer"
             />
-            <p className="text-[10px] text-slate-500">Number of retrieved chunks sent to Groq LLM</p>
+            <p className="text-[10px] text-stone-400">Number of retrieved chunks sent to Groq LLM</p>
           </div>
 
           {/* Model Switcher */}
           <div className="space-y-1.5">
-            <span className="block text-slate-300 font-semibold">Groq Model:</span>
+            <span className="block text-stone-600 font-semibold">Groq Model:</span>
             <select
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg p-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full bg-stone-100 border border-stone-300 text-stone-700 rounded-2xl p-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
               <option value="openai/gpt-oss-120b">GPT OSS 120B (High Reasoning)</option>
               <option value="openai/gpt-oss-20b">GPT OSS 20B (Fast Fallback)</option>
               <option value="qwen/qwen3.8-27b">Qwen 3.8 27B</option>
               <option value="groq/compound">Groq Compound</option>
             </select>
-            <p className="text-[10px] text-slate-500">Fast inference via Groq LPUs</p>
+            <p className="text-[10px] text-stone-400">Fast inference via Groq LPUs</p>
           </div>
         </div>
       )}
@@ -214,19 +214,19 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
       <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center max-w-xl mx-auto space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-emerald-400 shadow-xl shadow-emerald-950/20">
+            <div className="w-14 h-14 rounded-2xl bg-stone-100 border border-stone-300/80 flex items-center justify-center text-emerald-600 shadow-xl shadow-emerald-50">
               <Sparkles className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-100">Ask Anything About Your RFPs</h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <h3 className="text-lg font-bold text-stone-800">Ask Anything About Your RFPs</h3>
+              <p className="text-xs text-stone-500 mt-1">
                 RFPanda performs high-precision semantic search over your uploaded proposal documents and streams grounded answers with page-level citations.
               </p>
             </div>
 
             {/* Quick Prompt Suggestions */}
             <div className="w-full text-left pt-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-2">
                 Suggested Analyst Queries:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -235,9 +235,9 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
                     key={idx}
                     type="button"
                     onClick={() => sendMessage(prompt)}
-                    className="text-left p-3 rounded-xl bg-slate-850/80 hover:bg-slate-800 border border-slate-700/70 hover:border-emerald-600/60 text-xs text-slate-300 hover:text-slate-100 transition-all shadow-sm group"
+                    className="text-left p-3 rounded-xl bg-stone-50/80 hover:bg-stone-100 border border-stone-300/70 hover:border-emerald-600/60 text-xs text-stone-600 hover:text-stone-800 transition-all shadow-sm group"
                   >
-                    <span className="text-emerald-400 group-hover:text-emerald-300 mr-1.5 font-bold">→</span>
+                    <span className="text-emerald-600 group-hover:text-emerald-700 mr-1.5 font-bold">→</span>
                     {prompt}
                   </button>
                 ))}
@@ -257,7 +257,7 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
       </div>
 
       {/* Input Area Form */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/95">
+      <div className="p-4 border-t border-stone-200 bg-white/95">
         <form onSubmit={handleFormSubmit} className="relative">
           <textarea
             ref={textareaRef}
@@ -271,7 +271,7 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
                 : 'Ask a specific question about clauses, pricing, SLAs, or technical specs (Enter to submit)...'
             }
             disabled={documents.length === 0 || isStreaming}
-            className="w-full p-3.5 pr-28 bg-slate-800/80 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-all disabled:opacity-50"
+            className="w-full p-3.5 pr-28 bg-stone-100/80 border border-stone-300 rounded-xl text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-all disabled:opacity-50"
           />
 
           <div className="absolute right-3 bottom-3.5 flex items-center gap-2">
@@ -301,10 +301,10 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
           </div>
         </form>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2 px-1">
+        <div className="flex items-center justify-between text-[11px] text-stone-400 mt-2 px-1">
           <span>Press Enter to send • Shift+Enter for new line</span>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
             Direct SSE Stream (&lt;100ms TTFT)
           </span>
         </div>

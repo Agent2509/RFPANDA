@@ -69,7 +69,7 @@ export function DocumentCard({
       case 'completed':
         return (
           <Badge variant="success" className="gap-1">
-            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             Ready
           </Badge>
         );
@@ -77,21 +77,21 @@ export function DocumentCard({
       case 'fallback_processing':
         return (
           <Badge variant="warning" className="gap-1 animate-pulse">
-            <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+            <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
             Embedding...
           </Badge>
         );
       case 'uploaded':
         return (
           <Badge variant="info" className="gap-1">
-            <Clock className="w-3 h-3 text-cyan-400" />
+            <Clock className="w-3 h-3 text-sky-600" />
             Queued
           </Badge>
         );
       case 'awaiting_fallback_parse':
         return (
           <Badge variant="warning" className="gap-1">
-            <AlertTriangle className="w-3 h-3 text-amber-400" />
+            <AlertTriangle className="w-3 h-3 text-amber-600" />
             Fallback Ready
           </Badge>
         );
@@ -99,7 +99,7 @@ export function DocumentCard({
       default:
         return (
           <Badge variant="error" className="gap-1">
-            <AlertTriangle className="w-3 h-3 text-rose-400" />
+            <AlertTriangle className="w-3 h-3 text-rose-600" />
             Failed
           </Badge>
         );
@@ -112,8 +112,8 @@ export function DocumentCard({
     <div
       className={`relative p-4 rounded-xl border transition-all duration-200 ${
         isSelected
-          ? 'bg-emerald-950/20 border-emerald-500/70 shadow-md shadow-emerald-950/40'
-          : 'bg-slate-900/80 border-slate-800 hover:border-slate-700/80 hover:bg-slate-850/50'
+          ? 'bg-emerald-50 border-emerald-500/70 shadow-md shadow-emerald-50'
+          : 'bg-white/80 border-stone-200 hover:border-stone-300/80 hover:bg-stone-50/50'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -124,23 +124,23 @@ export function DocumentCard({
             checked={isSelected}
             onChange={() => onToggleSelect(document.id)}
             disabled={document.status !== 'processed' && document.status !== 'completed'}
-            className="mt-1 w-4 h-4 rounded text-emerald-600 bg-slate-800 border-slate-700 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer disabled:opacity-30"
+            className="mt-1 w-4 h-4 rounded text-emerald-600 bg-stone-100 border-stone-300 focus:ring-emerald-500 focus:ring-offset-white cursor-pointer disabled:opacity-30"
           />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-sm font-semibold text-slate-100 truncate max-w-[220px]" title={document.name}>
+              <h4 className="text-sm font-semibold text-stone-800 truncate max-w-[220px]" title={document.name}>
                 {document.name}
               </h4>
               {renderStatusBadge()}
             </div>
 
             {/* Subtitle / File Metadata */}
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400">
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-stone-500">
               <span>{formatBytes(document.file_size)}</span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Layers className="w-3 h-3 text-slate-500" />
+                <Layers className="w-3 h-3 text-stone-400" />
                 {totalChunks > 0 ? `${totalChunks} chunks` : '0 chunks'}
               </span>
               <span>•</span>
@@ -162,10 +162,10 @@ export function DocumentCard({
                 ? 'Protected from 30-day auto-cleanup (Click to disable)'
                 : 'Subject to 30-day stale auto-cleanup (Click to keep forever)'
             }
-            className={`p-1.5 rounded-lg border transition-colors ${
+            className={`p-1.5 rounded-full border transition-colors ${
               document.keep_forever
-                ? 'bg-emerald-950/60 border-emerald-700 text-emerald-300 hover:bg-emerald-900/60'
-                : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-50 border-emerald-700 text-emerald-700 hover:bg-emerald-100/60'
+                : 'bg-stone-100/60 border-stone-300 text-stone-500 hover:text-stone-700'
             }`}
           >
             {document.keep_forever ? (
@@ -184,7 +184,7 @@ export function DocumentCard({
               }
             }}
             title="Delete document"
-            className="p-1.5 rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 hover:text-rose-400 hover:border-rose-800/60 hover:bg-rose-950/40 transition-colors"
+            className="p-1.5 rounded-full border border-stone-300 bg-stone-100/60 text-stone-500 hover:text-rose-600 hover:border-rose-200/60 hover:bg-rose-50 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -193,8 +193,8 @@ export function DocumentCard({
 
       {/* Special Fallback Parse Action Banner */}
       {document.status === 'awaiting_fallback_parse' && (
-        <div className="mt-3 p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/50 flex items-center justify-between gap-2">
-          <div className="text-xs text-amber-300">
+        <div className="mt-3 p-2.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2">
+          <div className="text-xs text-amber-700">
             <span className="font-semibold">LlamaParse rate limit reached.</span> Extract text via browser PDF.js engine?
           </div>
           <Button
@@ -213,7 +213,7 @@ export function DocumentCard({
 
       {/* Error Message Details */}
       {document.status === 'failed' && document.error_message && (
-        <div className="mt-2 text-xs text-rose-400 bg-rose-950/30 p-2 rounded border border-rose-900/40 truncate" title={document.error_message}>
+        <div className="mt-2 text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-100/40 truncate" title={document.error_message}>
           {document.error_message}
         </div>
       )}
