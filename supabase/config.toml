@@ -1,4 +1,4 @@
-# ApexTender v2.0 Supabase Local Development Configuration
+# RFPANDA Supabase Local Development Configuration
 project_id = "rfp-engine"
 
 [api]

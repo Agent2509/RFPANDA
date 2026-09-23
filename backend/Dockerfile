@@ -1,5 +1,5 @@
 # ==============================================================================
-# ApexTender v2.0 - Production Multi-Stage Dockerfile (Render Free Tier <512MB)
+# RFPANDA - Production Multi-Stage Dockerfile (Render Free Tier <512MB)
 # ==============================================================================
 
 # Build stage

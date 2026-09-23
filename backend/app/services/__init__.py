@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Core Async Services
+RFPANDA - Core Async Services
 """
 
 from app.services.embedding import VoyageEmbeddingService, get_embedding_service

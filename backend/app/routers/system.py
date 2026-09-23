@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - System Health & Memory Telemetry Router
+RFPANDA - System Health & Memory Telemetry Router
 Exposes /health and /api/system/metrics endpoints continuously verifying
 that backend process RSS memory stays strictly below the 300MB Render free tier constraint.
 """

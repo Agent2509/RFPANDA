@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Interactive RFP Query & Streaming Hook
+// RFPANDA — Interactive RFP Query & Streaming Hook
 // Connects directly to FastAPI backend SSE stream, bypassing Vercel timeout.
 // ============================================================================
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Voyage AI Embedding REST Client
+// RFPANDA — Voyage AI Embedding REST Client
 // ============================================================================
 
 export interface EmbeddingResult {

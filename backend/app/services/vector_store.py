@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Supabase pgvector Vector Store Client
+RFPANDA - Supabase pgvector Vector Store Client
 Executes high-performance cosine similarity vector searches via the `match_documents` RPC
 and asynchronously refreshes retention access timestamps via `touch_document_last_queried`.
 """
@@ -10,7 +10,7 @@ import httpx
 
 from app.config import settings
 
-logger = logging.getLogger("apextender.vector_store")
+logger = logging.getLogger("rfpanda.vector_store")
 
 
 class VectorStoreError(Exception):

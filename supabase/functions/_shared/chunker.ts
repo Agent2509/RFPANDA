@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Markdown-Aware Semantic Chunker for RFP Documents
+// RFPANDA — Markdown-Aware Semantic Chunker for RFP Documents
 // ============================================================================
 
 export interface ProcessedChunk {

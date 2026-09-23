@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Supabase Client Helper for Edge Functions
+// RFPANDA — Supabase Client Helper for Edge Functions
 // ============================================================================
 
 import {

@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Chunker Unit Tests (Deno Test Runner)
+// RFPANDA — Chunker Unit Tests (Deno Test Runner)
 // ============================================================================
 
 import {

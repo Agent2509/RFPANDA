@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — LlamaParse Client with Error Classification & Fallback Trigger
+// RFPANDA — LlamaParse Client with Error Classification & Fallback Trigger
 // ============================================================================
 
 export type LlamaParseErrorType =

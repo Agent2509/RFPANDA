@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Schema Definitions
+RFPANDA - Schema Definitions
 """
 
 from app.schemas.query import (

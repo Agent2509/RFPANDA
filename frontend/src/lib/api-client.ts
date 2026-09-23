@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Direct-to-FastAPI SSE Streaming & API Client
+// RFPANDA — Direct-to-FastAPI SSE Streaming & API Client
 // Completely bypasses Vercel 10s Serverless Execution Timeout
 // ============================================================================
 

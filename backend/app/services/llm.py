@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Groq LLM Async Streaming Service
+RFPANDA - Groq LLM Async Streaming Service
 Orchestrates Llama-3.3-70b-versatile and Llama-3.1-8b-instant via Groq API
 with structured RFP system prompts, zero-hallucination guardrails, and real-time token streaming.
 """
@@ -13,10 +13,10 @@ from groq import AsyncGroq
 
 from app.config import settings
 
-logger = logging.getLogger("apextender.llm")
+logger = logging.getLogger("rfpanda.llm")
 
 
-RFP_SYSTEM_PROMPT = """You are the Senior RFP & Procurement Intelligence Assistant for ApexTender v2.0.
+RFP_SYSTEM_PROMPT = """You are the Senior RFP & Procurement Intelligence Assistant for RFPANDA.
 
 Your objective is to provide high-precision, executive-ready analysis and answers to RFP questions based STRICTLY and EXCLUSIVELY on the provided context excerpts.
 

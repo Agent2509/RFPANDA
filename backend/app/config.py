@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Configuration Management (Pydantic Settings)
+RFPANDA - Configuration Management (Pydantic Settings)
 Loads and validates environment variables for Supabase, Voyage AI, Groq, and runtime policies.
 """
 

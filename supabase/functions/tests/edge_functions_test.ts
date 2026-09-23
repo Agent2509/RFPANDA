@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Edge Functions Integration / Handler Unit Tests
+// RFPANDA — Edge Functions Integration / Handler Unit Tests
 // ============================================================================
 
 import {

@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Supabase Edge Function: process-document
+// RFPANDA — Supabase Edge Function: process-document
 // ============================================================================
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";

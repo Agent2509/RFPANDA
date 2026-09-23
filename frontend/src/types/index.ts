@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Frontend Type Definitions
+// RFPANDA — Frontend Type Definitions
 // ============================================================================
 
 export type DocumentStatus =

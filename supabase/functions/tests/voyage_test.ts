@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — VoyageClient Unit Tests (Deno Test Runner)
+// RFPANDA — VoyageClient Unit Tests (Deno Test Runner)
 // ============================================================================
 
 import {

@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Supabase Client Initializer
+// RFPANDA — Supabase Client Initializer
 // ============================================================================
 
 import { createBrowserClient } from '@supabase/ssr';

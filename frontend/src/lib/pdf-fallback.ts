@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Client-Side PDF.js Fallback Parser
+// RFPANDA — Client-Side PDF.js Fallback Parser
 // Extracts structured text page-by-page directly in the browser when LlamaParse
 // hits rate limits, quotas, or network timeouts.
 // ============================================================================

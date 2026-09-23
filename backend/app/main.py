@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - FastAPI Backend Application Entrypoint
+RFPANDA - FastAPI Backend Application Entrypoint
 Lightweight, cost-optimized RAG engine running with <120MB baseline RAM footprint
 on Render Free Tier (<512MB RAM cap).
 """
@@ -28,7 +28,7 @@ logging.basicConfig(
     level=logging.INFO if not settings.DEBUG else logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("apextender.main")
+logger = logging.getLogger("rfpanda.main")
 
 
 @asynccontextmanager
@@ -38,11 +38,11 @@ async def lifespan(app: FastAPI):
     Handles startup resource allocation and graceful shutdown cleanup.
     """
     logger.info(
-        f"Starting ApexTender v2.0 Backend Engine [Env: {settings.ENVIRONMENT}] "
+        f"Starting RFPANDA Backend Engine [Env: {settings.ENVIRONMENT}] "
         f"[Target RAM Limit: {settings.MEMORY_TARGET_LIMIT_MB}MB]"
     )
     yield
-    logger.info("Shutting down ApexTender v2.0 Backend Engine...")
+    logger.info("Shutting down RFPANDA Backend Engine...")
     # Close pooled HTTP clients
     embedding_svc = get_embedding_service()
     await embedding_svc.close()
@@ -57,7 +57,7 @@ def create_app() -> FastAPI:
     FastAPI application factory.
     """
     app = FastAPI(
-        title="ApexTender v2.0 RAG Backend",
+        title="RFPANDA RAG Backend",
         description="Production-Grade, Free-Tier-Proof RAG Engine for Enterprise RFP Analysis",
         version="2.0.0",
         lifespan=lifespan,
@@ -122,7 +122,7 @@ def create_app() -> FastAPI:
     async def root_index():
         return {
             "status": "alive",
-            "name": "ApexTender v2.0 RAG Backend",
+            "name": "RFPANDA RAG Backend",
             "version": "2.0.0",
             "environment": settings.ENVIRONMENT,
             "docs": "/docs" if settings.ENVIRONMENT != "production" else "disabled"

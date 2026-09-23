@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Request and Response Pydantic Models
+RFPANDA - Request and Response Pydantic Models
 Defines type-safe data transfer objects for RAG queries, SSE streaming payloads,
 citation metadata, memory telemetry, and fallback ingestion.
 """

@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Async Voyage AI Embedding Service
+RFPANDA - Async Voyage AI Embedding Service
 Generates 1024-dimensional dense vector embeddings using Voyage AI REST API (voyage-3-lite / voyage-3)
 with exponential backoff retries and zero local model weights (<120MB RSS footprint).
 """
@@ -14,7 +14,7 @@ import httpx
 
 from app.config import settings
 
-logger = logging.getLogger("apextender.embedding")
+logger = logging.getLogger("rfpanda.embedding")
 
 
 class VoyageEmbeddingError(Exception):

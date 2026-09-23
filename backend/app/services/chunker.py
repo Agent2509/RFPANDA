@@ -1,5 +1,5 @@
 """
-ApexTender v2.1 - Lightweight Semantic Chunker (Python)
+RFPANDA v2.1 - Lightweight Semantic Chunker (Python)
 Port of the TypeScript SemanticChunker used in Supabase Edge Functions.
 Splits markdown text into overlapping chunks with ~600 token targets.
 Preserves page numbers and markdown tables.
@@ -10,7 +10,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("apextender.chunker")
+logger = logging.getLogger("rfpanda.chunker")
 
 
 @dataclass

@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - RAG Query & Real-Time SSE Streaming Router
+RFPANDA - RAG Query & Real-Time SSE Streaming Router
 Handles user RFP questions, executes Voyage AI embeddings, searches Supabase pgvector,
 touches document retention timestamps, and streams Groq LLM responses via Server-Sent Events.
 """
@@ -26,7 +26,7 @@ from app.services.vector_store import get_vector_store, SupabaseVectorStore
 from app.services.llm import get_llm_service, GroqLLMService
 from app.config import settings
 
-logger = logging.getLogger("apextender.query")
+logger = logging.getLogger("rfpanda.query")
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -190,7 +190,7 @@ async def _process_fallback_ingestion_background(
         from app.services.chunker import SemanticChunker
         import logging
 
-        logger = logging.getLogger("apextender.query")
+        logger = logging.getLogger("rfpanda.query")
         vector_svc = get_vector_store()
         embedding_svc = get_embedding_service()
 
@@ -255,7 +255,7 @@ async def _process_fallback_ingestion_background(
 
     except Exception as e:
         import logging
-        logging.getLogger("apextender.query").error(f"Background ingestion failed: {e}", exc_info=True)
+        logging.getLogger("rfpanda.query").error(f"Background ingestion failed: {e}", exc_info=True)
         from app.services.vector_store import get_vector_store
         vector_svc = get_vector_store()
         await vector_svc.update_document_status(

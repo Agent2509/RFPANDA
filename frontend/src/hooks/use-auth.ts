@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Supabase Authentication Hook
+// RFPANDA — Supabase Authentication Hook
 // ============================================================================
 
 'use client';

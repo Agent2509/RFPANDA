@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — CORS Headers Helper for Supabase Edge Functions
+// RFPANDA — CORS Headers Helper for Supabase Edge Functions
 // ============================================================================
 
 export const corsHeaders: Record<string, string> = {

@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - Supabase JWT Authentication Middleware
+RFPANDA - Supabase JWT Authentication Middleware
 Validates Supabase Bearer JWT tokens statelessly (HS256 signature verification)
 when SUPABASE_JWT_SECRET is configured, or falls back to async non-blocking
 Supabase auth client verification.
@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from app.config import settings
 
-logger = logging.getLogger("apextender.auth")
+logger = logging.getLogger("rfpanda.auth")
 
 # Security scheme
 security = HTTPBearer(auto_error=False)
@@ -90,13 +90,13 @@ async def get_current_user(
             user_id = token.replace("test-token-", "")
             return AuthenticatedUser(
                 id=user_id,
-                email=f"{user_id}@apextender.test",
+                email=f"{user_id}@rfpanda.test",
                 role="authenticated"
             )
         elif token == "mock-token":
             return AuthenticatedUser(
                 id="00000000-0000-0000-0000-000000000001",
-                email="test-mock@apextender.test",
+                email="test-mock@rfpanda.test",
                 role="authenticated"
             )
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Supabase Edge Function: ingest-fallback-text
+// RFPANDA — Supabase Edge Function: ingest-fallback-text
 // ============================================================================
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";

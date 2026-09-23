@@ -1,5 +1,5 @@
 """
-ApexTender v2.0 - API Routers
+RFPANDA - API Routers
 """
 
 from app.routers.system import router as system_router

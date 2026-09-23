@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Documents Management Hook
+// RFPANDA — Documents Management Hook
 // Handles document listing, real-time status polling, keep_forever toggle,
 // deletion, and client-side fallback parsing.
 // ============================================================================

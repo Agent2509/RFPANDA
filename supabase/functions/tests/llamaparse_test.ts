@@ -1,5 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — LlamaParseClient Unit Tests (Deno Test Runner)
+// RFPANDA — LlamaParseClient Unit Tests (Deno Test Runner)
 // ============================================================================
 
 import {
