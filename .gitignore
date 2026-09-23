@@ -33,3 +33,4 @@ Thumbs.db
 .agents/
 .coverage
 htmlcov/
+.aider*
