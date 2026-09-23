@@ -129,10 +129,11 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         except jwt.InvalidTokenError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid token signature: {str(exc)}",
-                headers={"WWW-Authenticate": "Bearer"},
+            # Supabase projects on asymmetric signing keys (ES256/RS256) fail HS256
+            # verification here. Fall through to Supabase API verification instead
+            # of rejecting a potentially valid session token.
+            logger.warning(
+                f"HS256 verification failed ({str(exc)}); falling back to Supabase auth API"
             )
 
     # Fallback to Supabase API auth verification run non-blockingly on worker thread

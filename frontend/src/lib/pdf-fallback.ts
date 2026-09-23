@@ -160,8 +160,6 @@ export async function executeFallbackIngestion(
 
   const payload = {
     document_id: documentId,
-    text: parsed.fullText,
-    extracted_text: parsed.fullText,
     pages: parsed.pages,
     parser_used: 'pdfjs_client_fallback',
   };
