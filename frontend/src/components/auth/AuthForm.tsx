@@ -55,12 +55,17 @@ export function AuthForm({ mode }: AuthFormProps) {
         if (data.session) {
           router.push('/dashboard');
         } else {
-          setSuccessMessage('Account created! You can now sign in.');
-          setTimeout(() => router.push('/login'), 1500);
+          setSuccessMessage('Account created. Check your email to confirm, then sign in.');
+          setTimeout(() => router.push('/login'), 3000);
         }
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Authentication failed. Please check your credentials.');
+      const msg: string = err?.message || '';
+      if (/rate limit|email rate/i.test(msg)) {
+        setErrorMessage('Too many emails sent right now (Supabase free-tier limit). Try again later or disable email confirmation.');
+      } else {
+        setErrorMessage(msg || 'Authentication failed. Please check your credentials.');
+      }
     } finally {
       setIsSubmitting(false);
     }
