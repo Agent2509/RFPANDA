@@ -4,6 +4,7 @@ Loads and validates environment variables for Supabase, Voyage AI, Groq, and run
 """
 
 import os
+import json
 from functools import lru_cache
 from typing import List, Union
 from pydantic import Field, field_validator
@@ -37,8 +38,8 @@ class Settings(BaseSettings):
     # Groq Cloud Configuration
     GROQ_API_KEY: str = Field(default="groq-mock-api-key", description="Groq Cloud API key")
     GROQ_API_URL: str = Field(default="https://api.groq.com/openai/v1", description="Groq Cloud base URL")
-    GROQ_MODEL: str = Field(default="openai/gpt-oss-120b", description="Default Groq LLM model")
-    GROQ_FALLBACK_MODEL: str = Field(default="openai/gpt-oss-20b", description="Fast fallback Groq LLM model")
+    GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile", description="Default Groq LLM model")
+    GROQ_FALLBACK_MODEL: str = Field(default="llama-3.1-8b-instant", description="Fast fallback Groq LLM model")
     GROQ_TIMEOUT_SECONDS: float = Field(default=30.0, description="Timeout for Groq streaming responses")
 
     # RAG Search & Similarity Thresholds
@@ -58,10 +59,18 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
+        if isinstance(v, list):
+            return [str(i).strip() for i in v]
+        if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                try:
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return [str(i).strip() for i in parsed]
+                except json.JSONDecodeError:
+                    pass
             return [i.strip() for i in v.split(",") if i.strip()]
-        elif isinstance(v, (list, str)):
-            return v
         raise ValueError(v)
 
     model_config = SettingsConfigDict(

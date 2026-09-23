@@ -20,7 +20,7 @@ export function useRagQuery() {
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
   const [matchThreshold, setMatchThreshold] = useState<number>(0.15);
   const [topK, setTopK] = useState<number>(5);
-  const [model, setModel] = useState<string>('openai/gpt-oss-120b');
+  const [model, setModel] = useState<string>('llama-3.3-70b-versatile');
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const supabase = getSupabaseBrowserClient();

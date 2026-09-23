@@ -200,10 +200,8 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               onChange={(e) => setModel(e.target.value)}
               className="w-full bg-stone-100 border border-stone-300 text-stone-700 rounded-2xl p-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="openai/gpt-oss-120b">GPT OSS 120B (High Reasoning)</option>
-              <option value="openai/gpt-oss-20b">GPT OSS 20B (Fast Fallback)</option>
-              <option value="qwen/qwen3.8-27b">Qwen 3.8 27B</option>
-              <option value="groq/compound">Groq Compound</option>
+              <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Versatile)</option>
+              <option value="llama-3.1-8b-instant">Llama 3.1 8B (Instant)</option>
             </select>
             <p className="text-[10px] text-stone-400">Fast inference via Groq LPUs</p>
           </div>

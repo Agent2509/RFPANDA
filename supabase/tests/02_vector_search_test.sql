@@ -12,6 +12,7 @@ DECLARE
     v_user_b uuid := '22222222-2222-2222-2222-222222222222';
     v_doc_a1 uuid;
     v_doc_a2 uuid;
+    v_doc_ids uuid[];
     v_doc_b1 uuid;
     
     -- Construct 1024-dim test vectors
@@ -49,6 +50,8 @@ BEGIN
     INSERT INTO public.documents (user_id, name, storage_path, status)
     VALUES (v_user_a, 'UserA_Doc2.pdf', 'user_a/doc2/UserA_Doc2.pdf', 'completed')
     RETURNING id INTO v_doc_a2;
+
+    v_doc_ids := ARRAY[v_doc_a2];
 
     -- 4. Insert Document for User B
     INSERT INTO public.documents (user_id, name, storage_path, status)
@@ -92,7 +95,7 @@ BEGIN
     END IF;
     RAISE NOTICE '✓ match_documents similarity search and ordering verified (top similarity: %).', v_top_sim;
 
-    -- 9. Test Scoped Document Filter (filter_document_id)
+    -- 9. Test Scoped Document Filter (filter_document_ids)
     SELECT count(*)
     INTO v_match_count
     FROM public.match_documents(
@@ -100,13 +103,13 @@ BEGIN
         match_threshold => 0.1,
         match_count => 10,
         filter_user_id => v_user_a,
-        filter_document_id => v_doc_a2
+        filter_document_ids => v_doc_ids
     );
 
     IF v_match_count <> 1 THEN
         RAISE EXCEPTION 'TEST FAILED: Expected 1 match when filtering by doc_a2, got %', v_match_count;
     END IF;
-    RAISE NOTICE '✓ filter_document_id single-document scoping verified.';
+    RAISE NOTICE '✓ filter_document_ids single-document scoping verified.';
 
     -- 10. Test Multi-Tenant Isolation (User A MUST NOT see User B data)
     SELECT count(*)

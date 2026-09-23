@@ -62,7 +62,6 @@ serve(async (req: Request) => {
         "uploaded",
         "awaiting_fallback_parse",
         "failed",
-        "error",
         "processing",
       ])
       .select("id, user_id, name, storage_path, mime_type, metadata")
