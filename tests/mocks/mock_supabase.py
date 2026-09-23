@@ -239,7 +239,6 @@ class MockSupabaseService:
         match_threshold: float = 0.2,
         match_count: int = 5,
         filter_user_id: Optional[str] = None,
-        filter_document_id: Optional[str] = None,
         filter_document_ids: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """
@@ -266,8 +265,6 @@ class MockSupabaseService:
                 continue
 
             # Document ID filtering
-            if filter_document_id and chunk["document_id"] != filter_document_id:
-                continue
             if filter_document_ids and chunk["document_id"] not in filter_document_ids:
                 continue
 

@@ -121,9 +121,9 @@ def create_app() -> FastAPI:
     @app.get("/", tags=["Root"])
     async def root_index():
         return {
+            "status": "alive",
             "name": "ApexTender v2.0 RAG Backend",
             "version": "2.0.0",
-            "status": "online",
             "environment": settings.ENVIRONMENT,
             "docs": "/docs" if settings.ENVIRONMENT != "production" else "disabled"
         }

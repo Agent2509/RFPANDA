@@ -108,13 +108,13 @@ export function MessageBubble({
           h3: ({ node, ...props }) => <h3 className="text-lg font-bold text-stone-800 mt-3 mb-1.5 text-emerald-600" {...props} />,
           h4: ({ node, ...props }) => <h4 className="text-base font-bold text-stone-800 mt-2 mb-1" {...props} />,
           blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-emerald-500/50 pl-4 py-1 my-3 bg-stone-100/30 italic text-stone-600" {...props} />,
-          code: ({ node, inline, className, children, ...props }: any) => {
-            return inline ? (
-              <code className="bg-stone-100 text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>
+          pre: ({ node, ...props }) => <pre className="bg-white p-4 rounded-xl border border-stone-300 overflow-x-auto my-3" {...props} />,
+          code: ({ node, className, children, ...props }: any) => {
+            const isBlock = /language-/.test(className || '') || String(children).includes('\n');
+            return isBlock ? (
+              <code className={`${className || ''} text-stone-600 text-sm font-mono`} {...props}>{children}</code>
             ) : (
-              <pre className="bg-white p-4 rounded-xl border border-stone-300 overflow-x-auto my-3">
-                <code className="text-stone-600 text-sm font-mono" {...props}>{children}</code>
-              </pre>
+              <code className="bg-stone-100 text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>
             );
           },
         }}
@@ -228,7 +228,7 @@ export function MessageBubble({
         {/* Execution Performance Summary */}
         {isAssistant && message.summary && (
           <div className="mt-2 text-[10px] text-stone-400 font-mono flex items-center gap-2">
-            <span>Model: {message.summary.model || 'openai/gpt-oss-120b'}</span>
+            <span>Model: {message.summary.model || 'llama-3.3-70b-versatile'}</span>
             <span>•</span>
             <span>Tokens: {message.summary.completion_tokens || 0}</span>
             <span>•</span>

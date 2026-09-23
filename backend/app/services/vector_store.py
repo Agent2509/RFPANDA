@@ -181,7 +181,7 @@ class SupabaseVectorStore:
         payload = {"p_user_id": user_id}
         try:
             response = await client.post(rpc_url, json=payload, headers=self._get_headers())
-            if response.status_code != 200:
+            if response.status_code >= 400:
                 err_text = response.text
                 if "Free tier limit reached" in err_text:
                     raise VectorStoreError("Free tier limit reached: You can only ask up to 50 questions.")
@@ -258,7 +258,6 @@ class SupabaseVectorStore:
     async def delete_and_insert_chunks(
         self,
         document_id: str,
-        user_id: str,
         chunks: List[Dict[str, Any]],
         batch_size: int = 100,
     ) -> int:
