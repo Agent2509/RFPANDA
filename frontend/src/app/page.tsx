@@ -1,89 +1,135 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
-import { Zap, Search, ArrowRight, FileText, CheckCircle } from 'lucide-react';
+import { ArrowRight, FileText, Search, ShieldCheck, Sparkles, Quote } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const router = useRouter();
-
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFAF8] text-stone-800 font-sans">
-      <header className="flex h-16 items-center justify-between border-b border-stone-200 bg-white/80 px-6 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🐼</span>
-          <h1 className="text-xl font-bold tracking-tight text-stone-900">
-            RFPANDA
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login">
-            <Button variant="outline" className="text-emerald-600 border-stone-200 bg-white hover:bg-stone-50 rounded-full">
-              Sign In / Enter App
-            </Button>
+    <div className="flex min-h-screen flex-col bg-canvas text-zinc-900">
+      {/* Nav */}
+      <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-zinc-900 text-lg shadow-sm">🐼</span>
+            <span className="text-base font-extrabold tracking-tight">RFPANDA</span>
           </Link>
+          <nav className="flex items-center gap-2">
+            <Link href="/login">
+              <Button variant="ghost" size="sm">Sign in</Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm" className="gap-1.5">
+                Get started <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </nav>
         </div>
       </header>
 
       <main className="flex-1">
-        <section className="relative px-6 py-24 md:py-32 lg:py-40 flex flex-col items-center text-center overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-50 via-[#FAFAF8] to-[#FAFAF8] -z-10"></div>
-          
-          <div className="mb-6 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-             <Zap className="mr-2 h-4 w-4" /> AI-Powered Document Search
-          </div>
+        {/* Hero */}
+        <section className="relative overflow-hidden px-5 py-20 md:py-28">
+          <div className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-brand-300/30 blur-3xl" />
 
-          <h2 className="max-w-4xl text-4xl font-extrabold tracking-tight text-stone-900 sm:text-5xl md:text-6xl lg:text-7xl">
-            Understand Your Docs <span className="text-emerald-600">Instantly</span> with AI.
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-500 md:text-xl">
-            Upload any document — PDFs, notes, research papers — and get instant AI-powered answers with exact page citations. No hallucinations, just facts.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link href="/login">
-              <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 font-semibold px-8 py-6 rounded-full text-lg shadow-lg shadow-emerald-200/50">
-                Get Started Free <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-600" /> Free to Use</span>
-            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-emerald-600" /> No Credit Card Required</span>
+          <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center animate-fade-up">
+            <span className="chip border-brand-200 bg-brand-50 text-brand-700">
+              <Sparkles className="h-3.5 w-3.5" />
+              Grounded document AI
+            </span>
+
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
+              Ask your documents
+              <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent"> anything</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-base text-zinc-500 md:text-lg">
+              Upload PDFs and reports, then get instant answers with exact page citations. No hallucinations — every
+              claim is grounded in your files.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+              <Link href="/signup">
+                <Button size="lg" className="gap-2">
+                  Get started free <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline">Sign in</Button>
+              </Link>
+            </div>
+
+            <p className="mt-4 text-xs text-zinc-400">No credit card required · PDF, DOCX, TXT, MD</p>
           </div>
         </section>
 
-        <section className="py-20 px-6 bg-white border-y border-stone-200">
-          <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-lg shadow-stone-200/60 border border-stone-100">
-              <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
-                <Search className="h-8 w-8" />
+        {/* Features */}
+        <section className="border-y border-zinc-200/70 bg-white px-5 py-20">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-3">
+            {[
+              {
+                icon: <Search className="h-5 w-5" />,
+                title: 'Semantic search',
+                body: 'Find the right passage across hundreds of pages in milliseconds using vector similarity.',
+              },
+              {
+                icon: <ShieldCheck className="h-5 w-5" />,
+                title: 'Grounded answers',
+                body: 'Responses are generated only from retrieved context, so you can trust what you read.',
+              },
+              {
+                icon: <FileText className="h-5 w-5" />,
+                title: 'Page-level citations',
+                body: 'Every answer links back to the exact document, page, and excerpt it came from.',
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="group rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card"
+              >
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
+                  {f.icon}
+                </span>
+                <h3 className="mt-4 text-base font-bold text-zinc-900">{f.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">{f.body}</p>
               </div>
-              <h3 className="text-xl font-bold text-stone-900 mb-2">Smart Search</h3>
-              <p className="text-stone-500">Instantly search through hundreds of pages to find exactly what you need.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-lg shadow-stone-200/60 border border-stone-100">
-              <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
-                <span className="text-3xl">🐼</span>
-              </div>
-              <h3 className="text-xl font-bold text-stone-900 mb-2">Zero Hallucinations</h3>
-              <p className="text-stone-500">Every answer is strictly sourced from your actual documents — no made-up information, ever.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-lg shadow-stone-200/60 border border-stone-100">
-              <div className="p-4 rounded-full bg-emerald-50 text-emerald-600 mb-5">
-                <FileText className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-bold text-stone-900 mb-2">Page-Level Citations</h3>
-              <p className="text-stone-500">Every answer shows exactly which page and section it came from, so you can verify it yourself.</p>
+            ))}
+          </div>
+        </section>
+
+        {/* Quote / stats strip */}
+        <section className="px-5 py-20">
+          <div className="mx-auto flex max-w-4xl flex-col items-center rounded-3xl border border-zinc-200/80 bg-white p-10 text-center shadow-soft">
+            <Quote className="h-7 w-7 text-brand-300" />
+            <p className="mt-4 max-w-2xl text-lg font-medium leading-relaxed text-zinc-700">
+              “I dropped in a 500-page report and got a precise, cited summary in seconds instead of skimming for an
+              afternoon.”
+            </p>
+            <div className="mt-6 grid grid-cols-3 gap-8 border-t border-zinc-100 pt-6 text-center">
+              {[
+                ['50MB', 'max file size'],
+                ['1024-d', 'embeddings'],
+                ['p. X', 'citations'],
+              ].map(([value, label]) => (
+                <div key={label}>
+                  <p className="text-xl font-extrabold tracking-tight text-zinc-900">{value}</p>
+                  <p className="text-xs text-zinc-400">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stone-200 bg-[#FAFAF8] py-8 text-center text-stone-400">
-        <p>© 2026 RFPanda Inc. All rights reserved.</p>
+      <footer className="border-t border-zinc-200/70 bg-white py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-xs text-zinc-400 sm:flex-row">
+          <span className="flex items-center gap-2">
+            <span>🐼</span> © 2026 RFPANDA
+          </span>
+          <span>Built for people who’d rather ask than skim.</span>
+        </div>
       </footer>
     </div>
   );

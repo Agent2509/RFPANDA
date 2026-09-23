@@ -9,8 +9,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'RFPANDA — Smart Document AI',
-  description: 'Upload documents and get instant AI-powered answers with page-level citations.',
+  title: 'RFPANDA — Ask your documents anything',
+  description: 'Upload documents and get instant, cited answers grounded in your own files.',
 };
 
 export default function RootLayout({
@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`min-h-screen bg-[#FAFAF8] font-sans ${plusJakartaSans.variable}`}>
+    <html lang="en" className={plusJakartaSans.variable}>
+      <body className="min-h-screen bg-canvas font-sans text-zinc-900">
         <RouteGuard>{children}</RouteGuard>
       </body>
     </html>

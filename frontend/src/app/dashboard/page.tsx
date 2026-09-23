@@ -1,6 +1,6 @@
 // ============================================================================
-// ApexTender v2.0 — Main Dashboard & RAG Workspace
-// Combines Document Library, Direct Storage Upload, and Direct SSE Chat.
+// RFPANDA — Workspace
+// Two-pane layout: document library rail + grounded RAG chat.
 // ============================================================================
 
 'use client';
@@ -13,13 +13,7 @@ import { DocumentList } from '@/components/documents/DocumentList';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { MemoryIndicator } from '@/components/system/MemoryIndicator';
 import { Button } from '@/components/ui';
-import {
-  LogOut,
-  LogIn,
-  User,
-  Menu,
-  X,
-} from 'lucide-react';
+import { LogOut, LogIn, Menu, X, PanelLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
@@ -36,119 +30,151 @@ export default function DashboardPage() {
   } = useDocuments();
 
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [railCollapsed, setRailCollapsed] = useState(false);
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAF8] text-stone-900 font-sans">
-      {/* Top Nav Bar */}
-      <header className="h-14 border-b border-stone-200 bg-white/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🐼</span>
-            <h1 className="text-lg font-bold tracking-tight text-stone-900">
-              RFPANDA <span className="text-emerald-600 font-normal text-xs ml-1">v2.0</span>
-            </h1>
+  const Sidebar = (
+    <div className="flex h-full flex-col">
+      {/* Brand */}
+      <div className="flex items-center justify-between px-4 h-16 border-b border-zinc-200/80">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-zinc-900 text-lg shadow-sm transition group-hover:scale-105">
+            🐼
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="text-sm font-extrabold tracking-tight text-zinc-900">RFPANDA</span>
+            <span className="text-[10px] font-medium text-zinc-400">Document AI</span>
+          </span>
+        </Link>
+
+        <button
+          onClick={() => setMobileNavOpen(false)}
+          className="icon-btn lg:hidden"
+          aria-label="Close navigation"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setRailCollapsed(true)}
+          className="icon-btn hidden lg:inline-flex"
+          aria-label="Collapse library"
+          title="Collapse library"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Upload */}
+      <div className="px-4 pt-4">
+        <UploadDropzone onUploadSuccess={refreshDocuments} />
+      </div>
+
+      {/* Library */}
+      <div className="flex-1 min-h-0 px-4 py-4">
+        <DocumentList
+          documents={documents}
+          loading={docsLoading}
+          selectedDocIds={selectedDocIds}
+          onSelectDocIds={setSelectedDocIds}
+          onToggleKeepForever={toggleKeepForever}
+          onDelete={deleteDocument}
+          onRefresh={refreshDocuments}
+          onRunFallback={runFallbackParser}
+          parsingDocId={parsingDocId}
+          parseProgress={parseProgress}
+        />
+      </div>
+
+      {/* Account footer */}
+      <div className="border-t border-zinc-200/80 px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
+              {user?.email ? user.email.charAt(0).toUpperCase() : '?'}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-xs font-semibold text-zinc-700">
+                {user?.email || 'Guest'}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Signed in
+              </span>
+            </span>
           </div>
-        </div>
 
-        {/* Center / Right Telemetry & Auth */}
-        <div className="flex items-center gap-4">
-          {/* Backend RAM Diagnostic Badge */}
-          <MemoryIndicator />
-
-          {/* User Auth Section */}
           {!authLoading && user ? (
-            <div className="flex items-center gap-3 pl-3 border-l border-stone-200">
-              <div className="hidden md:flex flex-col text-right">
-                <span className="text-xs font-semibold text-stone-700 truncate max-w-[150px]">
-                  {user.email}
-                </span>
-                <span className="text-[10px] text-emerald-600 font-mono">Online</span>
-              </div>
-
-              <div className="w-8 h-8 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 font-bold text-xs">
-                {user.email ? user.email.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
-              </div>
-
-              <button
-                onClick={signOut}
-                title="Sign out"
-                className="p-1.5 rounded-full border border-stone-200 bg-stone-50 text-stone-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
+            <button onClick={signOut} className="icon-btn icon-btn-danger" title="Sign out" aria-label="Sign out">
+              <LogOut className="h-4 w-4" />
+            </button>
           ) : !authLoading ? (
             <Link href="/login">
-              <Button size="sm" variant="primary" className="text-xs flex items-center gap-1.5 rounded-full">
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Sign In</span>
+              <Button size="sm" className="gap-1.5">
+                <LogIn className="h-3.5 w-3.5" />
+                Sign in
               </Button>
             </Link>
           ) : null}
-
-          {/* Sidebar Toggle */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition-colors ml-2"
-            aria-label="Open sidebar"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        </div>
-      </header>
-
-      {/* Main Area */}
-      <main className="flex-1 w-full max-w-4xl mx-auto p-4 lg:p-6 flex flex-col h-[calc(100vh-3.5rem)]">
-        <ChatInterface documents={documents} selectedDocIds={selectedDocIds} />
-      </main>
-
-      {/* Slide-out Sidebar Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-40 transition-opacity sidebar-overlay"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Slide-out Sidebar Panel */}
-      <div 
-        className={`fixed top-0 left-0 w-80 h-full bg-white z-50 shadow-2xl rounded-r-2xl overflow-hidden transition-transform duration-300 ease-in-out flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
-          <h2 className="font-semibold text-stone-800">Documents</h2>
-          <button 
-            onClick={() => setSidebarOpen(false)}
-            className="p-1.5 rounded-full hover:bg-stone-200 text-stone-500 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
-          <div className="flex-shrink-0">
-            <UploadDropzone onUploadSuccess={refreshDocuments} />
-          </div>
-
-          <div className="flex-1">
-            <DocumentList
-              documents={documents}
-              loading={docsLoading}
-              selectedDocIds={selectedDocIds}
-              onSelectDocIds={setSelectedDocIds}
-              onToggleKeepForever={toggleKeepForever}
-              onDelete={deleteDocument}
-              onRefresh={refreshDocuments}
-              onRunFallback={runFallbackParser}
-              parsingDocId={parsingDocId}
-              parseProgress={parseProgress}
-            />
-          </div>
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-canvas">
+      {/* Desktop library rail */}
+      {!railCollapsed && (
+        <aside className="hidden lg:flex w-[360px] shrink-0 flex-col border-r border-zinc-200/80 bg-white">
+          {Sidebar}
+        </aside>
+      )}
+
+      {/* Collapsed rail toggle */}
+      {railCollapsed && (
+        <div className="hidden lg:flex w-14 shrink-0 flex-col items-center border-r border-zinc-200/80 bg-white py-4">
+          <button
+            onClick={() => setRailCollapsed(false)}
+            className="icon-btn"
+            aria-label="Expand library"
+            title="Expand library"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </button>
+          <span className="mt-4 text-xl">🐼</span>
+        </div>
+      )}
+
+      {/* Main workspace */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Mobile top bar */}
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-zinc-200/80 bg-white/90 px-4 backdrop-blur lg:hidden">
+          <button onClick={() => setMobileNavOpen(true)} className="icon-btn" aria-label="Open navigation">
+            <Menu className="h-5 w-5" />
+          </button>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-lg">🐼</span>
+            <span className="text-sm font-extrabold tracking-tight text-zinc-900">RFPANDA</span>
+          </Link>
+          <div className="w-8" />
+        </header>
+
+        <main className="min-h-0 flex-1 p-3 sm:p-5">
+          <ChatInterface documents={documents} selectedDocIds={selectedDocIds} />
+        </main>
+      </div>
+
+      {/* Mobile drawer */}
+      {mobileNavOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-zinc-900/30 backdrop-blur-sm animate-fade-in lg:hidden"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <aside className="fixed inset-y-0 left-0 z-50 w-[88%] max-w-sm bg-white shadow-lift animate-drawer-left lg:hidden">
+            {Sidebar}
+          </aside>
+        </>
+      )}
     </div>
   );
 }

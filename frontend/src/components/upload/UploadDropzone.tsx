@@ -1,14 +1,13 @@
 // ============================================================================
-// ApexTender v2.0 — Direct Supabase Storage Upload Dropzone
-// Directly uploads files (>10MB to 50MB) to Supabase Storage bucket `rfp-documents`
-// at `{user_id}/{document_id}/{filename}`, completely bypassing Vercel's 4.5MB limit.
+// RFPANDA — Upload Dropzone
+// Uploads directly to Supabase Storage (bypasses serverless body limits).
 // ============================================================================
 
 'use client';
 
 import React, { useState, useRef } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Button } from '@/components/ui';
+import { Button, ProgressBar } from '@/components/ui';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lucide-react';
 
 interface UploadDropzoneProps {
@@ -32,9 +31,7 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
     setIsDragging(true);
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+  const handleDragLeave = () => setIsDragging(false);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -54,10 +51,9 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    // Max 50MB
     const MAX_SIZE = 50 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setErrorMessage('File size exceeds the 50MB free-tier limit.');
+      setErrorMessage('File exceeds the 50MB limit.');
       return;
     }
 
@@ -77,7 +73,7 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
       file.name.endsWith('.docx');
 
     if (!isPdfOrText) {
-      setErrorMessage('Supported file formats: PDF, DOCX, TXT, MD.');
+      setErrorMessage('Supported formats: PDF, DOCX, TXT, MD.');
       return;
     }
 
@@ -108,13 +104,14 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
         throw new Error('You must be signed in to upload documents.');
       }
 
-      const documentId = typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-            const r = (Math.random() * 16) | 0;
-            const v = c === 'x' ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-          });
+      const documentId =
+        typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              const v = c === 'x' ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            });
 
       const sanitizedFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `${user.id}/${documentId}/${sanitizedFileName}`;
@@ -122,7 +119,6 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
       setUploadStatus('Registering document...');
       setProgress(25);
 
-      // Step 1: Insert document metadata in database with status 'uploaded'
       const { error: dbError } = await supabase.from('documents').insert({
         id: documentId,
         user_id: user.id,
@@ -143,25 +139,17 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
         throw new Error(`Failed to create database record: ${dbError.message}`);
       }
 
-      setUploadStatus('Direct upload to Supabase Storage (Bypassing Vercel 4.5MB limit)...');
+      setUploadStatus('Uploading to storage...');
       setProgress(50);
 
-      // Step 2: Direct browser upload to Supabase Storage bucket 'rfp-documents'
       let uploadResult = await supabase.storage
         .from('rfp-documents')
-        .upload(storagePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: true,
-        });
+        .upload(storagePath, selectedFile, { cacheControl: '3600', upsert: true });
 
       if (uploadResult.error) {
-        // Fallback to 'documents' bucket if 'rfp-documents' is not found
         uploadResult = await supabase.storage
           .from('documents')
-          .upload(storagePath, selectedFile, {
-            cacheControl: '3600',
-            upsert: true,
-          });
+          .upload(storagePath, selectedFile, { cacheControl: '3600', upsert: true });
 
         if (uploadResult.error) {
           await supabase.from('documents').delete().eq('id', documentId);
@@ -170,9 +158,8 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
       }
 
       setProgress(80);
-      setUploadStatus('Triggering background ingestion pipeline...');
+      setUploadStatus('Starting ingestion...');
 
-      // Step 3: Trigger Edge Function `process-document`
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321';
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token || '';
@@ -185,25 +172,21 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            document_id: documentId,
-            storage_path: storagePath,
-          }),
+          body: JSON.stringify({ document_id: documentId, storage_path: storagePath }),
         });
 
         if (res.ok) {
           const resData = await res.json().catch(() => ({}));
           if (resData.status === 'awaiting_fallback_parse') {
-            setSuccessMessage('Uploaded! Primary parser reached rate limits. Ready for client-side PDF.js parsing.');
+            setSuccessMessage('Uploaded. Parser hit a rate limit — use Run fallback on the document.');
           } else {
-            setSuccessMessage(`Document uploaded & scheduled for processing! (${formatFileSize(selectedFile.size)})`);
+            setSuccessMessage(`Uploaded ${formatFileSize(selectedFile.size)}. Processing now.`);
           }
         } else {
-          setSuccessMessage(`Document uploaded (${formatFileSize(selectedFile.size)}). Ingestion queued.`);
+          setSuccessMessage(`Uploaded ${formatFileSize(selectedFile.size)}. Ingestion queued.`);
         }
       } catch {
-        // Even if Edge Function invoke fails, document is uploaded safely in storage
-        setSuccessMessage(`Document uploaded to storage (${formatFileSize(selectedFile.size)}).`);
+        setSuccessMessage(`Uploaded ${formatFileSize(selectedFile.size)} to storage.`);
       }
 
       setProgress(100);
@@ -221,31 +204,29 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
   };
 
   return (
-    <div className="w-full bg-white/60 border border-stone-200 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4">
+    <div className="panel-muted p-3">
+      <div className="mb-2.5 flex items-center gap-2">
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-600 text-white">
+          <UploadCloud className="h-3.5 w-3.5" />
+        </span>
         <div>
-          <h3 className="text-sm font-bold text-stone-800 uppercase tracking-wider flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-emerald-600" />
-            Upload RFP Document
-          </h3>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Direct-to-storage upload bypassing Vercel's 4.5MB limit (Up to 50MB supported)
-          </p>
+          <h3 className="text-xs font-bold text-zinc-800">Add a document</h3>
+          <p className="text-[10px] text-zinc-400">PDF, DOCX, TXT, MD · up to 50MB</p>
         </div>
       </div>
 
-      {/* Dropzone container */}
+      {/* Dropzone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+        className={`cursor-pointer rounded-xl border-2 border-dashed p-4 text-center transition-all ${
           isDragging
-            ? 'border-emerald-500 bg-emerald-50'
+            ? 'border-brand-500 bg-brand-50'
             : selectedFile
-            ? 'border-stone-300 bg-stone-50/50'
-            : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50/30'
+            ? 'border-zinc-300 bg-white'
+            : 'border-zinc-300 bg-white/60 hover:border-brand-400 hover:bg-brand-50/40'
         }`}
       >
         <input
@@ -258,25 +239,20 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
 
         {!selectedFile ? (
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-500 mb-3 group-hover:text-emerald-600">
-              <UploadCloud className="w-6 h-6" />
-            </div>
-            <p className="text-sm font-medium text-stone-700">
-              Drag & drop your RFP here, or <span className="text-emerald-600 font-semibold underline">browse</span>
-            </p>
-            <p className="text-xs text-stone-400 mt-1">
-              Supports large PDFs, DOCX, TXT, and Markdown files
+            <UploadCloud className="mb-2 h-5 w-5 text-zinc-400" />
+            <p className="text-xs font-medium text-zinc-600">
+              Drag &amp; drop, or <span className="font-semibold text-brand-600 underline underline-offset-2">browse</span>
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-between bg-stone-100/80 p-3 rounded-2xl border border-stone-300">
-            <div className="flex items-center gap-3 overflow-hidden text-left">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div className="truncate">
-                <p className="text-sm font-semibold text-stone-800 truncate">{selectedFile.name}</p>
-                <p className="text-xs text-stone-500">{formatFileSize(selectedFile.size)}</p>
+          <div className="flex items-center justify-between gap-2 text-left">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+                <FileText className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-zinc-800">{selectedFile.name}</p>
+                <p className="text-[10px] text-zinc-400">{formatFileSize(selectedFile.size)}</p>
               </div>
             </div>
             <button
@@ -285,68 +261,52 @@ export function UploadDropzone({ onUploadSuccess }: UploadDropzoneProps) {
                 e.stopPropagation();
                 setSelectedFile(null);
               }}
-              className="p-1 text-stone-500 hover:text-stone-700 rounded-md hover:bg-stone-200"
+              className="icon-btn h-6 w-6"
+              aria-label="Remove file"
             >
-              <X className="w-4 h-4" />
+              <X className="h-3 w-3" />
             </button>
           </div>
         )}
       </div>
 
-      {/* Progress Bar & Status */}
+      {/* Progress */}
       {isUploading && (
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-stone-600">
+        <div className="mt-3">
+          <div className="flex items-center justify-between text-[11px] text-zinc-500">
             <span className="flex items-center gap-1.5 font-medium">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+              <Loader2 className="h-3 w-3 animate-spin text-brand-600" />
               {uploadStatus || 'Uploading...'}
             </span>
-            <span className="font-semibold text-emerald-600">{progress}%</span>
+            <span className="font-mono font-semibold text-brand-600">{progress}%</span>
           </div>
-          <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-1.5 transition-all duration-300 ease-out rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <ProgressBar value={progress} className="mt-1.5 h-1" />
         </div>
       )}
 
-      {/* Error / Success Messages */}
+      {/* Messages */}
       {errorMessage && (
-        <div className="mt-3 p-3 rounded-2xl bg-rose-50 border border-rose-200/50 text-rose-700 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-rose-200/60 bg-rose-50 p-2.5 text-[11px] text-rose-700">
+          <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
-
       {successMessage && (
-        <div className="mt-3 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-200/60 bg-emerald-50 p-2.5 text-[11px] text-emerald-700">
+          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}
 
-      {/* Upload Action Button */}
+      {/* Actions */}
       {selectedFile && !isUploading && (
-        <div className="mt-4 flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setSelectedFile(null)}
-          >
+        <div className="mt-3 flex justify-end gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
             Cancel
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={executeUpload}
-            className="flex items-center gap-1.5"
-          >
-            <UploadCloud className="w-4 h-4" />
-            Upload {formatFileSize(selectedFile.size)}
+          <Button type="button" size="sm" onClick={executeUpload} className="gap-1.5">
+            <UploadCloud className="h-3.5 w-3.5" />
+            Upload
           </Button>
         </div>
       )}

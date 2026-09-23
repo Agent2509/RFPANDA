@@ -1,6 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Interactive RFP Query & Streaming Chat Interface
-// Connects directly to FastAPI SSE backend, bypassing Vercel's 10s timeout.
+// RFPANDA — Chat interface (SSE streaming)
 // ============================================================================
 
 'use client';
@@ -10,6 +9,7 @@ import { useRagQuery } from '@/hooks/use-rag-query';
 import { DocumentItem } from '@/types';
 import { MessageBubble } from './MessageBubble';
 import { CitationDrawer } from './CitationDrawer';
+import { MemoryIndicator } from '@/components/system/MemoryIndicator';
 import { Button } from '@/components/ui';
 import {
   Send,
@@ -19,7 +19,6 @@ import {
   Sparkles,
   Bot,
   Layers,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -59,15 +58,20 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Sync selectedDocIds from parent DocumentList
   useEffect(() => {
     setSelectedDocIds(selectedDocIds);
   }, [selectedDocIds, setSelectedDocIds]);
 
-  // Autoscroll on new messages/tokens
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isStreaming]);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [inputQuery]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,83 +88,81 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
     }
   };
 
-  // Find names of currently scoped documents
   const scopedDocNames = documents
     .filter((d) => selectedDocIds.includes(d.id))
     .map((d) => d.name);
 
+  const hasDocuments = documents.length > 0;
+
   return (
-    <div className="flex flex-col h-full bg-white/60 border border-stone-200 rounded-2xl shadow-xl backdrop-blur-sm overflow-hidden">
-      {/* Top Header Bar */}
-      <div className="p-4 border-b border-stone-200 bg-white/90 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-600 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
-            <Bot className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-stone-800 flex items-center gap-2">
-              AI Assistant
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/60 font-mono font-medium">
-                SSE Direct Stream
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-soft">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200/80 px-4 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-sm">
+            <Bot className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-900">
+              Assistant
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-200/70 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Grounded
               </span>
             </h2>
-            <p className="text-xs text-stone-500">
+            <p className="truncate text-xs text-zinc-400">
               {selectedDocIds.length === 0
-                ? 'Searching across all your uploaded documents'
+                ? 'Searching across all your documents'
                 : `Scoped to ${selectedDocIds.length} document${selectedDocIds.length > 1 ? 's' : ''}: ${scopedDocNames.join(', ')}`}
             </p>
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <MemoryIndicator />
+
           <button
             type="button"
             onClick={() => setShowSettings(!showSettings)}
-            className={`p-2 rounded-full border text-xs flex items-center gap-1.5 transition-colors ${
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold transition ${
               showSettings
-                ? 'bg-emerald-50 border-emerald-700 text-emerald-700'
-                : 'bg-stone-100/80 border-stone-300 text-stone-600 hover:text-stone-900'
+                ? 'border-brand-200 bg-brand-50 text-brand-700'
+                : 'border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800'
             }`}
-            title="Adjust RAG parameters (similarity threshold, top-k, model)"
+            title="Retrieval parameters"
           >
-            <Sliders className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline font-medium">RAG Parameters</span>
-            {showSettings ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            <Sliders className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Settings</span>
+            {showSettings ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </button>
 
           {currentSources.length > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
+            <button
+              type="button"
               onClick={() => setIsCitationDrawerOpen(true)}
-              className="text-xs py-1.5 px-3 flex items-center gap-1.5 border-emerald-200/60 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-2.5 text-[11px] font-semibold text-brand-700 transition hover:bg-brand-100/70"
             >
-              <Layers className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Citations ({currentSources.length})</span>
-            </Button>
+              <Layers className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Citations</span>
+              <span className="font-mono">{currentSources.length}</span>
+            </button>
           )}
 
           {messages.length > 0 && (
-            <button
-              onClick={clearMessages}
-              title="Clear conversation"
-              className="p-2 rounded-full border border-stone-300 bg-stone-100/80 text-stone-500 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
+            <button onClick={clearMessages} title="Clear conversation" className="icon-btn h-8 w-8">
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Expandable Query Settings Drawer */}
+      {/* Settings */}
       {showSettings && (
-        <div className="p-4 bg-stone-50 border-b border-stone-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs animate-in slide-in-from-top-2 duration-200">
-          {/* Similarity Threshold */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-stone-600 font-semibold">
-              <span>Similarity Threshold:</span>
-              <span className="text-emerald-600 font-mono font-bold">{matchThreshold}</span>
+        <div className="grid grid-cols-1 gap-5 border-b border-zinc-200/80 bg-zinc-50/70 px-4 py-4 sm:grid-cols-3 animate-fade-in">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-500">
+              <span>Similarity threshold</span>
+              <span className="font-mono text-brand-600">{matchThreshold.toFixed(2)}</span>
             </div>
             <input
               type="range"
@@ -169,16 +171,15 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               step="0.05"
               value={matchThreshold}
               onChange={(e) => setMatchThreshold(parseFloat(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className="w-full cursor-pointer accent-brand-600"
             />
-            <p className="text-[10px] text-stone-400">Lower = broader context; Higher = strict relevance</p>
+            <p className="text-[10px] text-zinc-400">Lower = broader context, higher = stricter relevance</p>
           </div>
 
-          {/* Top-K Chunks */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-stone-600 font-semibold">
-              <span>Top-K Context Chunks:</span>
-              <span className="text-emerald-600 font-mono font-bold">{topK}</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-500">
+              <span>Top-K chunks</span>
+              <span className="font-mono text-brand-600">{topK}</span>
             </div>
             <input
               type="range"
@@ -187,55 +188,48 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
               step="1"
               value={topK}
               onChange={(e) => setTopK(parseInt(e.target.value))}
-              className="w-full accent-emerald-500 cursor-pointer"
+              className="w-full cursor-pointer accent-brand-600"
             />
-            <p className="text-[10px] text-stone-400">Number of retrieved chunks sent to Groq LLM</p>
+            <p className="text-[10px] text-zinc-400">Number of retrieved chunks sent to the model</p>
           </div>
 
-          {/* Model Switcher */}
-          <div className="space-y-1.5">
-            <span className="block text-stone-600 font-semibold">Groq Model:</span>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-stone-100 border border-stone-300 text-stone-700 rounded-2xl p-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Versatile)</option>
-              <option value="llama-3.1-8b-instant">Llama 3.1 8B (Instant)</option>
+          <div className="space-y-2">
+            <span className="block text-[11px] font-semibold text-zinc-500">Model</span>
+            <select value={model} onChange={(e) => setModel(e.target.value)} className="field py-2 text-xs">
+              <option value="llama-3.3-70b-versatile">Llama 3.3 70B · Versatile</option>
+              <option value="llama-3.1-8b-instant">Llama 3.1 8B · Instant</option>
             </select>
-            <p className="text-[10px] text-stone-400">Fast inference via Groq LPUs</p>
+            <p className="text-[10px] text-zinc-400">Inference via Groq</p>
           </div>
         </div>
       )}
 
-      {/* Chat Messages Flow Area */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+      {/* Messages */}
+      <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center max-w-xl mx-auto space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-stone-100 border border-stone-300/80 flex items-center justify-center text-emerald-600 shadow-xl shadow-emerald-50">
-              <Sparkles className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-stone-800">Ask Anything About Your Docs</h3>
-              <p className="text-xs text-stone-500 mt-1">
-                Upload any document and ask questions — get instant answers with exact page citations.
-              </p>
-            </div>
+          <div className="mx-auto flex max-w-xl flex-col items-center justify-center py-10 text-center animate-fade-up">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-card">
+              <Sparkles className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 text-lg font-bold tracking-tight text-zinc-900">
+              Ask anything about your documents
+            </h3>
+            <p className="mt-1 max-w-sm text-sm text-zinc-400">
+              Every answer is grounded in your uploads with page-level citations.
+            </p>
 
-            {/* Quick Prompt Suggestions */}
-            <div className="w-full text-left pt-3">
-              <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider block mb-2">
-                Try asking:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="mt-6 w-full text-left">
+              <span className="eyebrow">Try asking</span>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {QUICK_PROMPTS.map((prompt, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => sendMessage(prompt)}
-                    className="text-left p-3 rounded-xl bg-stone-50/80 hover:bg-stone-100 border border-stone-300/70 hover:border-emerald-600/60 text-xs text-stone-600 hover:text-stone-800 transition-all shadow-sm group"
+                    disabled={!hasDocuments}
+                    className="group flex items-start gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-left text-xs text-zinc-600 shadow-sm transition hover:border-brand-300 hover:bg-brand-50/40 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <span className="text-emerald-600 group-hover:text-emerald-700 mr-1.5 font-bold">→</span>
+                    <span className="mt-0.5 font-bold text-brand-500 transition group-hover:translate-x-0.5">→</span>
                     {prompt}
                   </button>
                 ))}
@@ -254,61 +248,60 @@ export function ChatInterface({ documents, selectedDocIds }: ChatInterfaceProps)
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area Form */}
-      <div className="p-4 border-t border-stone-200 bg-white/95">
-        <form onSubmit={handleFormSubmit} className="relative">
+      {/* Composer */}
+      <div className="border-t border-zinc-200/80 bg-white p-3 sm:p-4">
+        <form
+          onSubmit={handleFormSubmit}
+          className="relative rounded-2xl border border-zinc-200 bg-zinc-50/70 p-1.5 transition focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-500/10"
+        >
           <textarea
             ref={textareaRef}
-            rows={2}
+            rows={1}
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              documents.length === 0
-                ? 'Upload a document first to start asking questions...'
-                : 'Ask anything about your documents... (Enter to send)'
+              !hasDocuments
+                ? 'Upload a document to start asking questions…'
+                : 'Ask a question about your documents…'
             }
-            disabled={documents.length === 0 || isStreaming}
-            className="w-full p-3.5 pr-28 bg-stone-100/80 border border-stone-300 rounded-xl text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-all disabled:opacity-50"
+            disabled={!hasDocuments || isStreaming}
+            className="max-h-40 w-full resize-none bg-transparent px-3 py-2.5 pr-24 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none disabled:opacity-50"
           />
 
-          <div className="absolute right-3 bottom-3.5 flex items-center gap-2">
+          <div className="absolute bottom-2 right-2 flex items-center gap-2">
             {isStreaming ? (
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                onClick={abortQuery}
-                className="py-1.5 px-3 text-xs flex items-center gap-1.5"
-              >
-                <Square className="w-3 h-3 fill-current" />
+              <Button type="button" variant="danger" size="sm" onClick={abortQuery} className="gap-1.5">
+                <Square className="h-3 w-3 fill-current" />
                 Stop
               </Button>
             ) : (
               <Button
                 type="submit"
-                variant="primary"
                 size="sm"
-                disabled={!inputQuery.trim() || documents.length === 0}
-                className="py-1.5 px-3.5 text-xs flex items-center gap-1.5"
+                disabled={!inputQuery.trim() || !hasDocuments}
+                className="gap-1.5"
               >
-                <span>Ask</span>
-                <Send className="w-3.5 h-3.5" />
+                Ask
+                <Send className="h-3.5 w-3.5" />
               </Button>
             )}
           </div>
         </form>
 
-        <div className="flex items-center justify-between text-[11px] text-stone-400 mt-2 px-1">
-          <span>Press Enter to send • Shift+Enter for new line</span>
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-            Direct SSE Stream (&lt;100ms TTFT)
+        <div className="mt-2 flex items-center justify-between px-1 text-[10px] text-zinc-400">
+          <span>
+            <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 font-sans">Enter</kbd> to send ·{' '}
+            <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 font-sans">Shift</kbd>+
+            <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 font-sans">Enter</kbd> for new line
+          </span>
+          <span className="hidden items-center gap-1.5 sm:flex">
+            <span className={`h-1.5 w-1.5 rounded-full ${isStreaming ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+            {isStreaming ? 'Streaming…' : 'Ready'}
           </span>
         </div>
       </div>
 
-      {/* Ground-Truth Citation Drawer */}
       <CitationDrawer
         isOpen={isCitationDrawerOpen}
         onClose={() => setIsCitationDrawerOpen(false)}

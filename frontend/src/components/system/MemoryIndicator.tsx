@@ -1,20 +1,21 @@
 // ============================================================================
-// ApexTender v2.0 — System Health & Memory Indicator Component
-// Polls FastAPI backend /api/system/metrics and verifies RAM < 300MB.
+// RFPANDA — Backend health & memory indicator
+// Polls /api/system/metrics and shows live RAM / uptime telemetry.
 // ============================================================================
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchSystemMetrics } from '@/lib/api-client';
 import { SystemMetrics } from '@/types';
-import { Activity, Server, Cpu, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Server, Cpu, Clock, CheckCircle2, Activity } from 'lucide-react';
 
 export function MemoryIndicator() {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const pollMetrics = async () => {
     try {
@@ -30,25 +31,35 @@ export function MemoryIndicator() {
 
   useEffect(() => {
     pollMetrics();
-    const interval = setInterval(pollMetrics, 10000); // 10s poll
+    const interval = setInterval(pollMetrics, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const rssMb = metrics?.memory_rss_mb ?? 88.5;
+  useEffect(() => {
+    if (!showDetails) return;
+    const onClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDetails(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [showDetails]);
+
+  const rssMb = metrics?.memory_rss_mb ?? 0;
   const targetMb = metrics?.target_limit_mb ?? 300.0;
   const percentage = Math.min(100, Math.round((rssMb / targetMb) * 100));
 
   const isHealthy = rssMb < 250;
   const isWarning = rssMb >= 250 && rssMb <= targetMb;
-  const isCritical = rssMb > targetMb;
 
-  const statusColor = !isOnline
-    ? 'bg-stone-300 text-stone-600'
+  const dotColor = !isOnline
+    ? 'bg-zinc-300'
     : isHealthy
-    ? 'bg-emerald-600'
+    ? 'bg-emerald-500'
     : isWarning
     ? 'bg-amber-400'
-    : 'bg-rose-600';
+    : 'bg-rose-500';
 
   const formatUptime = (seconds?: number) => {
     if (!seconds) return 'N/A';
@@ -58,89 +69,83 @@ export function MemoryIndicator() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
-        onClick={() => setShowDetails(!showDetails)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 border border-stone-200 hover:border-stone-300 text-xs text-stone-600 transition-colors shadow-sm"
-        title="Click to view backend memory & health diagnostics"
+        onClick={() => setShowDetails((v) => !v)}
+        className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-zinc-900"
+        title="Backend health"
       >
-        <div className="relative flex items-center justify-center">
-          <span className={`w-2 h-2 rounded-full ${statusColor} ${isOnline ? 'animate-pulse' : ''}`} />
-        </div>
-
-        <span className="font-medium text-stone-500 hidden sm:inline">Backend RAM:</span>
-        <span className="font-mono font-bold text-stone-700">
-          {isOnline ? `${rssMb.toFixed(1)} MB` : 'Standby'}
+        <span className={`h-1.5 w-1.5 rounded-full ${dotColor} ${isOnline ? 'animate-pulse' : ''}`} />
+        <span className="hidden sm:inline text-zinc-400">Backend</span>
+        <span className="font-mono font-semibold text-zinc-700">
+          {loading ? '…' : isOnline ? `${rssMb.toFixed(0)} MB` : 'Offline'}
         </span>
-        <span className="text-[10px] text-stone-400 font-mono">/ 300MB</span>
       </button>
 
-      {/* Dropdown / Popover Modal */}
       {showDetails && (
-        <div className="absolute right-0 mt-2 w-72 p-4 bg-white border border-stone-200 rounded-2xl shadow-2xl z-50 text-xs text-stone-600 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between border-b border-stone-200 pb-2.5">
-            <div className="flex items-center gap-2 font-bold text-stone-800">
-              <Server className="w-4 h-4 text-emerald-600" />
-              <span>FastAPI Free-Tier Diagnostics</span>
-            </div>
+        <div className="absolute right-0 z-50 mt-2 w-72 space-y-3 rounded-2xl border border-zinc-200 bg-white p-4 text-xs text-zinc-600 shadow-lift animate-scale-in">
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+            <span className="flex items-center gap-2 font-bold text-zinc-900">
+              <Server className="h-4 w-4 text-brand-600" />
+              Backend health
+            </span>
             <span
-              className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-stone-100 text-stone-500'
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+                isOnline
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-zinc-200 bg-zinc-100 text-zinc-500'
               }`}
             >
-              {isOnline ? 'HEALTHY' : 'OFFLINE'}
+              {isOnline ? 'Healthy' : 'Offline'}
             </span>
           </div>
 
-          {/* Memory Bar */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-[11px]">
-              <span className="text-stone-500">Memory RSS:</span>
-              <span className="font-mono font-bold text-emerald-600">{rssMb.toFixed(1)} MB ({percentage}%)</span>
+              <span className="text-zinc-500">Memory (RSS)</span>
+              <span className="font-mono font-semibold text-zinc-800">
+                {rssMb.toFixed(1)} MB · {percentage}%
+              </span>
             </div>
-            <div className="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
               <div
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-full rounded-full transition-all duration-300 ${
                   isHealthy ? 'bg-emerald-500' : isWarning ? 'bg-amber-500' : 'bg-rose-500'
                 }`}
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-stone-400">
+            <div className="flex justify-between text-[10px] text-zinc-400">
               <span>0 MB</span>
-              <span>Target: 300 MB Limit</span>
+              <span>Target {targetMb.toFixed(0)} MB</span>
             </div>
           </div>
 
-          {/* Telemetry Breakdown */}
-          <div className="space-y-1.5 pt-1 border-t border-stone-200/80 text-[11px]">
+          <div className="space-y-2 border-t border-zinc-100 pt-2.5 text-[11px]">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-stone-500">
-                <Cpu className="w-3.5 h-3.5 text-stone-400" />
-                CPU Utilization:
+              <span className="flex items-center gap-1.5 text-zinc-500">
+                <Cpu className="h-3.5 w-3.5 text-zinc-400" /> CPU
               </span>
-              <span className="font-mono text-stone-700">{metrics?.cpu_percent ?? 0.8}%</span>
+              <span className="font-mono text-zinc-700">{metrics?.cpu_percent ?? 0}%</span>
             </div>
-
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-stone-500">
-                <Clock className="w-3.5 h-3.5 text-stone-400" />
-                Backend Uptime:
+              <span className="flex items-center gap-1.5 text-zinc-500">
+                <Clock className="h-3.5 w-3.5 text-zinc-400" /> Uptime
               </span>
-              <span className="font-mono text-stone-700">{formatUptime(metrics?.uptime_seconds)}</span>
+              <span className="font-mono text-zinc-700">{formatUptime(metrics?.uptime_seconds)}</span>
             </div>
-
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-stone-500">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                Render RAM Cap:
+              <span className="flex items-center gap-1.5 text-zinc-500">
+                <Activity className="h-3.5 w-3.5 text-zinc-400" /> Threads
               </span>
-              <span className="font-mono text-stone-700">512 MB Free</span>
+              <span className="font-mono text-zinc-700">{metrics?.threads_count ?? 0}</span>
             </div>
-          </div>
-
-          <div className="text-[10px] text-stone-400 bg-stone-50 p-2 rounded-2xl border border-stone-200">
-            Stateless architecture eliminates in-memory vector weights to prevent OOM termination.
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-zinc-500">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> RAM cap
+              </span>
+              <span className="font-mono text-zinc-700">512 MB</span>
+            </div>
           </div>
         </div>
       )}

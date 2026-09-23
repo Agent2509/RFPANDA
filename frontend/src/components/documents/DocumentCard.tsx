@@ -1,6 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Document Card Component
-// Displays document metadata, status, keep_forever toggle, and fallback action.
+// RFPANDA — Document Card
 // ============================================================================
 
 'use client';
@@ -19,7 +18,6 @@ import {
   Loader2,
   Layers,
   Sparkles,
-  ExternalLink,
 } from 'lucide-react';
 
 interface DocumentCardProps {
@@ -50,56 +48,55 @@ export function DocumentCard({
 
   const formatRelativeTime = (isoString?: string | null) => {
     if (!isoString) return 'Never';
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(mins / 60);
+    const days = Math.floor(hours / 24);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
   };
+
+  const isReady = document.status === 'processed' || document.status === 'completed';
 
   const renderStatusBadge = () => {
     switch (document.status) {
       case 'processed':
       case 'completed':
         return (
-          <Badge variant="success" className="gap-1">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <Badge variant="success">
+            <CheckCircle2 className="h-3 w-3" />
             Ready
           </Badge>
         );
       case 'processing':
       case 'fallback_processing':
         return (
-          <Badge variant="warning" className="gap-1 animate-pulse">
-            <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
-            Embedding...
+          <Badge variant="warning" className="animate-pulse">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Embedding
           </Badge>
         );
       case 'uploaded':
         return (
-          <Badge variant="info" className="gap-1">
-            <Clock className="w-3 h-3 text-sky-600" />
+          <Badge variant="info">
+            <Clock className="h-3 w-3" />
             Queued
           </Badge>
         );
       case 'awaiting_fallback_parse':
         return (
-          <Badge variant="warning" className="gap-1">
-            <AlertTriangle className="w-3 h-3 text-amber-600" />
-            Fallback Ready
+          <Badge variant="warning">
+            <AlertTriangle className="h-3 w-3" />
+            Fallback ready
           </Badge>
         );
       case 'failed':
       default:
         return (
-          <Badge variant="error" className="gap-1">
-            <AlertTriangle className="w-3 h-3 text-rose-600" />
+          <Badge variant="error">
+            <AlertTriangle className="h-3 w-3" />
             Failed
           </Badge>
         );
@@ -110,113 +107,112 @@ export function DocumentCard({
 
   return (
     <div
-      className={`relative p-4 rounded-xl border transition-all duration-200 ${
+      className={`group rounded-xl border p-3 transition-all ${
         isSelected
-          ? 'bg-emerald-50 border-emerald-500/70 shadow-md shadow-emerald-50'
-          : 'bg-white/80 border-stone-200 hover:border-stone-300/80 hover:bg-stone-50/50'
+          ? 'border-brand-300 bg-brand-50/60 ring-1 ring-brand-200'
+          : 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:shadow-sm'
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Document Selection Checkbox & Icon */}
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => onToggleSelect(document.id)}
-            disabled={document.status !== 'processed' && document.status !== 'completed'}
-            className="mt-1 w-4 h-4 rounded text-emerald-600 bg-stone-100 border-stone-300 focus:ring-emerald-500 focus:ring-offset-white cursor-pointer disabled:opacity-30"
-          />
+      <div className="flex items-start gap-2.5">
+        {/* Selection */}
+        <button
+          type="button"
+          onClick={() => isReady && onToggleSelect(document.id)}
+          disabled={!isReady}
+          aria-label={isSelected ? 'Deselect document' : 'Select document'}
+          className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition ${
+            isSelected
+              ? 'border-brand-600 bg-brand-600 text-white'
+              : 'border-zinc-300 bg-white text-transparent hover:border-zinc-400'
+          } ${!isReady ? 'cursor-not-allowed opacity-30' : ''}`}
+        >
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        </button>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-sm font-semibold text-stone-800 truncate max-w-[220px]" title={document.name}>
-                {document.name}
-              </h4>
-              {renderStatusBadge()}
+        {/* Body */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-zinc-100 text-zinc-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">
+                <FileText className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-zinc-800" title={document.name}>
+                  {document.name}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-zinc-400">
+                  <span>{formatBytes(document.file_size)}</span>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <Layers className="h-3 w-3" />
+                    {totalChunks > 0 ? `${totalChunks} chunks` : 'no chunks'}
+                  </span>
+                </p>
+              </div>
             </div>
 
-            {/* Subtitle / File Metadata */}
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-stone-500">
-              <span>{formatBytes(document.file_size)}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Layers className="w-3 h-3 text-stone-400" />
-                {totalChunks > 0 ? `${totalChunks} chunks` : '0 chunks'}
-              </span>
-              <span>•</span>
-              <span title={`Last queried: ${document.last_queried_at || 'Never'}`}>
-                Queried: {formatRelativeTime(document.last_queried_at)}
-              </span>
+            {/* Actions */}
+            <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 max-lg:opacity-100">
+              <button
+                type="button"
+                onClick={() => onToggleKeepForever(document.id, document.keep_forever)}
+                title={document.keep_forever ? 'Protected from auto-cleanup' : 'Keep forever (skip auto-cleanup)'}
+                className={`icon-btn h-7 w-7 ${document.keep_forever ? 'border-brand-200 bg-brand-50 text-brand-600' : ''}`}
+              >
+                {document.keep_forever ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Delete "${document.name}"? This cannot be undone.`)) {
+                    onDelete(document.id, document.storage_path);
+                  }
+                }}
+                title="Delete document"
+                className="icon-btn icon-btn-danger h-7 w-7"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {/* Keep Forever Toggle Switch */}
-          <button
-            type="button"
-            onClick={() => onToggleKeepForever(document.id, document.keep_forever)}
-            title={
-              document.keep_forever
-                ? 'Protected from 30-day auto-cleanup (Click to disable)'
-                : 'Subject to 30-day stale auto-cleanup (Click to keep forever)'
-            }
-            className={`p-1.5 rounded-full border transition-colors ${
-              document.keep_forever
-                ? 'bg-emerald-50 border-emerald-700 text-emerald-700 hover:bg-emerald-100/60'
-                : 'bg-stone-100/60 border-stone-300 text-stone-500 hover:text-stone-700'
-            }`}
-          >
-            {document.keep_forever ? (
-              <Lock className="w-3.5 h-3.5" />
-            ) : (
-              <Unlock className="w-3.5 h-3.5" />
-            )}
-          </button>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            {renderStatusBadge()}
+            <span className="text-[10px] text-zinc-400" title={document.last_queried_at || 'Never queried'}>
+              queried {formatRelativeTime(document.last_queried_at)}
+            </span>
+          </div>
 
-          {/* Delete Button */}
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm(`Delete document "${document.name}"? This action is permanent.`)) {
-                onDelete(document.id, document.storage_path);
-              }
-            }}
-            title="Delete document"
-            className="p-1.5 rounded-full border border-stone-300 bg-stone-100/60 text-stone-500 hover:text-rose-600 hover:border-rose-200/60 hover:bg-rose-50 transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          {/* Fallback action */}
+          {document.status === 'awaiting_fallback_parse' && (
+            <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg border border-amber-200/70 bg-amber-50 p-2">
+              <p className="text-[11px] leading-tight text-amber-800">
+                Primary parser hit a rate limit. Extract locally?
+              </p>
+              <Button
+                size="sm"
+                onClick={() => onRunFallback(document.id, document.storage_path)}
+                disabled={isParsingFallback}
+                isLoading={isParsingFallback}
+                className="shrink-0 bg-amber-500 text-amber-950 hover:bg-amber-400"
+              >
+                {!isParsingFallback && <Sparkles className="h-3 w-3" />}
+                Run fallback
+              </Button>
+            </div>
+          )}
+
+          {/* Error */}
+          {document.status === 'failed' && document.error_message && (
+            <p
+              className="mt-2 truncate rounded-lg border border-rose-100 bg-rose-50 px-2 py-1.5 text-[11px] text-rose-600"
+              title={document.error_message}
+            >
+              {document.error_message}
+            </p>
+          )}
         </div>
       </div>
-
-      {/* Special Fallback Parse Action Banner */}
-      {document.status === 'awaiting_fallback_parse' && (
-        <div className="mt-3 p-2.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2">
-          <div className="text-xs text-amber-700">
-            <span className="font-semibold">LlamaParse rate limit reached.</span> Extract text via browser PDF.js engine?
-          </div>
-          <Button
-            size="sm"
-            variant="primary"
-            disabled={isParsingFallback}
-            isLoading={isParsingFallback}
-            onClick={() => onRunFallback(document.id, document.storage_path)}
-            className="text-xs py-1 px-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold flex-shrink-0"
-          >
-            <Sparkles className="w-3 h-3 mr-1" />
-            Run Fallback
-          </Button>
-        </div>
-      )}
-
-      {/* Error Message Details */}
-      {document.status === 'failed' && document.error_message && (
-        <div className="mt-2 text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-100/40 truncate" title={document.error_message}>
-          {document.error_message}
-        </div>
-      )}
     </div>
   );
 }

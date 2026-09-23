@@ -1,6 +1,5 @@
 // ============================================================================
-// ApexTender v2.0 — Chat Message Bubble Component
-// Renders markdown, code, interactive citation pills, and copy-to-clipboard.
+// RFPANDA — Chat message
 // ============================================================================
 
 'use client';
@@ -9,18 +8,8 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { ChatMessage, SourceCitation } from '@/types';
-import {
-  User,
-  Bot,
-  Copy,
-  Check,
-  FileText,
-  AlertCircle,
-  Clock,
-  Sparkles,
-  Layers,
-} from 'lucide-react';
+import { ChatMessage } from '@/types';
+import { Copy, Check, FileText, AlertCircle, Layers, Sparkles } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -28,11 +17,7 @@ interface MessageBubbleProps {
   onOpenCitationDrawer?: () => void;
 }
 
-export function MessageBubble({
-  message,
-  onOpenCitation,
-  onOpenCitationDrawer,
-}: MessageBubbleProps) {
+export function MessageBubble({ message, onOpenCitation, onOpenCitationDrawer }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
   const isAssistant = message.role === 'assistant';
 
@@ -42,18 +27,13 @@ export function MessageBubble({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
+      /* ignore */
     }
   };
 
-  /**
-   * Simple, secure client-side Markdown formatter for streaming answers.
-   */
   const renderFormattedContent = (content: string) => {
     if (!content) return null;
 
-    // Convert [[Doc: filename.pdf, p. X]] to markdown links for interception
-    // We encode the citation data into the hash of the URL: #cite|||filename.pdf|||X
     const processedContent = content.replace(
       /\[\[Doc:\s*(.*?),\s*p\.\s*(\d+)(?:\s*-\s*.*?)?\]\]/g,
       '[Citation](#cite|||$1|||$2)'
@@ -63,7 +43,7 @@ export function MessageBubble({
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ node, href, children, ...props }) => {
+          a: ({ href, children, ...props }) => {
             if (href?.startsWith('#cite|||')) {
               const parts = href.split('|||');
               const fileName = parts[1] || 'Unknown';
@@ -75,46 +55,62 @@ export function MessageBubble({
                     e.stopPropagation();
                     onOpenCitationDrawer?.();
                   }}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-700/60 rounded hover:bg-emerald-100 hover:text-emerald-100 transition-colors shadow-sm cursor-pointer align-middle"
+                  className="mx-0.5 inline-flex items-center gap-1 rounded-md border border-brand-200 bg-brand-50 px-1.5 py-0.5 align-middle text-[11px] font-semibold text-brand-700 transition hover:border-brand-300 hover:bg-brand-100"
                   title={`View citation in ${fileName} (p. ${pageNum})`}
                 >
-                  <FileText className="w-3 h-3 text-emerald-600" />
-                  <span className="truncate max-w-[150px]">{fileName}</span>
-                  <span className="text-emerald-600 font-mono text-[10px]">p.{pageNum}</span>
+                  <FileText className="h-3 w-3" />
+                  <span className="max-w-[150px] truncate">{fileName}</span>
+                  <span className="font-mono text-[10px] text-brand-500">p.{pageNum}</span>
                 </button>
               );
             }
             return (
-              <a href={href} className="text-emerald-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props}>
+              <a
+                href={href}
+                className="font-medium text-brand-600 underline underline-offset-2 hover:text-brand-700"
+                target="_blank"
+                rel="noopener noreferrer"
+                {...props}
+              >
                 {children}
               </a>
             );
           },
-          table: ({ node, ...props }) => (
-            <div className="overflow-x-auto my-4">
-              <table className="min-w-full text-sm text-left text-stone-700 border border-stone-300 rounded-2xl overflow-hidden" {...props} />
+          table: (props) => (
+            <div className="my-3 overflow-x-auto rounded-xl border border-zinc-200">
+              <table className="min-w-full text-left text-sm text-zinc-700" {...props} />
             </div>
           ),
-          thead: ({ node, ...props }) => <thead className="bg-stone-100/80 text-xs uppercase text-stone-500" {...props} />,
-          th: ({ node, ...props }) => <th className="px-4 py-3 border-b border-stone-300" {...props} />,
-          td: ({ node, ...props }) => <td className="px-4 py-3 border-b border-stone-300/60" {...props} />,
-          tr: ({ node, ...props }) => <tr className="hover:bg-stone-100/40" {...props} />,
-          p: ({ node, ...props }) => <p className="leading-relaxed my-2" {...props} />,
-          ul: ({ node, ...props }) => <ul className="list-disc ml-6 my-2" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal ml-6 my-2" {...props} />,
-          li: ({ node, ...props }) => <li className="my-1" {...props} />,
-          h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-stone-800 mt-5 mb-3" {...props} />,
-          h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-stone-800 mt-4 mb-2" {...props} />,
-          h3: ({ node, ...props }) => <h3 className="text-lg font-bold text-stone-800 mt-3 mb-1.5 text-emerald-600" {...props} />,
-          h4: ({ node, ...props }) => <h4 className="text-base font-bold text-stone-800 mt-2 mb-1" {...props} />,
-          blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-emerald-500/50 pl-4 py-1 my-3 bg-stone-100/30 italic text-stone-600" {...props} />,
-          pre: ({ node, ...props }) => <pre className="bg-white p-4 rounded-xl border border-stone-300 overflow-x-auto my-3" {...props} />,
-          code: ({ node, className, children, ...props }: any) => {
+          thead: (props) => <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500" {...props} />,
+          th: (props) => <th className="border-b border-zinc-200 px-3 py-2 font-semibold" {...props} />,
+          td: (props) => <td className="border-b border-zinc-100 px-3 py-2" {...props} />,
+          p: (props) => <p className="my-2 leading-relaxed" {...props} />,
+          ul: (props) => <ul className="my-2 ml-5 list-disc space-y-1 marker:text-zinc-300" {...props} />,
+          ol: (props) => <ol className="my-2 ml-5 list-decimal space-y-1 marker:text-zinc-300" {...props} />,
+          li: (props) => <li className="leading-relaxed" {...props} />,
+          h1: (props) => <h1 className="mb-2 mt-4 text-xl font-bold text-zinc-900" {...props} />,
+          h2: (props) => <h2 className="mb-2 mt-4 text-lg font-bold text-zinc-900" {...props} />,
+          h3: (props) => <h3 className="mb-1.5 mt-3 text-base font-bold text-zinc-900" {...props} />,
+          h4: (props) => <h4 className="mb-1 mt-2 text-sm font-bold text-zinc-900" {...props} />,
+          blockquote: (props) => (
+            <blockquote className="my-3 border-l-2 border-brand-300 bg-brand-50/40 px-3 py-1 text-zinc-600" {...props} />
+          ),
+          pre: (props) => (
+            <pre className="my-3 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900 p-3.5 text-xs" {...props} />
+          ),
+          code: ({ className, children, ...props }: any) => {
             const isBlock = /language-/.test(className || '') || String(children).includes('\n');
             return isBlock ? (
-              <code className={`${className || ''} text-stone-600 text-sm font-mono`} {...props}>{children}</code>
+              <code className={`${className || ''} font-mono text-zinc-100`} {...props}>
+                {children}
+              </code>
             ) : (
-              <code className="bg-stone-100 text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>
+              <code
+                className="rounded-md border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.85em] text-brand-700"
+                {...props}
+              >
+                {children}
+              </code>
             );
           },
         }}
@@ -124,115 +120,104 @@ export function MessageBubble({
     );
   };
 
-  return (
-    <div
-      className={`flex gap-4 p-5 rounded-2xl transition-colors ${
-        isAssistant
-          ? 'bg-white/90 border border-stone-200 shadow-lg'
-          : 'bg-stone-50/70 border border-stone-200/60'
-      }`}
-    >
-      {/* Avatar Icon */}
-      <div
-        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md ${
-          isAssistant
-            ? 'bg-gradient-to-tr from-emerald-600 to-emerald-600 text-slate-950 font-bold'
-            : 'bg-stone-200 text-stone-700'
-        }`}
-      >
-        {isAssistant ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
+  /* ------------------------------------------------------------- User turn */
+  if (!isAssistant) {
+    return (
+      <div className="flex flex-row-reverse items-start gap-3 animate-fade-up">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-zinc-200 text-xs font-bold text-zinc-600">
+          You
+        </span>
+        <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-brand-600 px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm">
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        </div>
       </div>
+    );
+  }
 
-      {/* Message Content Body */}
-      <div className="flex-1 min-w-0">
-        {/* Header: Name + Timestamp + Actions */}
-        <div className="flex items-center justify-between mb-2">
+  /* -------------------------------------------------------- Assistant turn */
+  return (
+    <div className="flex items-start gap-3 animate-fade-up">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-sm">
+        <Sparkles className="h-4 w-4" />
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">RFPANDA</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-600">
-              {isAssistant ? 'RFPanda AI (Grounded RAG)' : 'You'}
-            </span>
-            <span className="text-[11px] text-stone-400">{message.timestamp}</span>
+            <span className="text-[10px] text-zinc-300">{message.timestamp}</span>
+            {message.content && (
+              <button
+                onClick={copyToClipboard}
+                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+                title="Copy answer"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3 w-3 text-emerald-600" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3" />
+                    Copy
+                  </>
+                )}
+              </button>
+            )}
           </div>
-
-          {isAssistant && message.content && (
-            <button
-              onClick={copyToClipboard}
-              className="flex items-center gap-1 text-xs text-stone-500 hover:text-emerald-600 px-2 py-1 rounded bg-stone-100/60 hover:bg-stone-100 border border-stone-300/60 transition-colors"
-              title="Copy answer to clipboard"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-600 font-semibold">Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
-          )}
         </div>
 
-        {/* Error state */}
         {message.error ? (
-          <div className="p-3 bg-rose-50 border border-rose-200/60 rounded-xl text-rose-700 text-xs flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 rounded-xl border border-rose-200/70 bg-rose-50 p-3 text-xs text-rose-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <div>
-              <p className="font-semibold">Generation Error</p>
-              <p className="text-rose-600/90 mt-0.5">{message.error}</p>
+              <p className="font-semibold">Generation error</p>
+              <p className="mt-0.5 text-rose-600/90">{message.error}</p>
             </div>
           </div>
-        ) : (
-          <div className="prose prose-invert prose-sm max-w-none text-stone-700">
-            {renderFormattedContent(message.content)}
+        ) : message.content ? (
+          <div className="text-sm leading-relaxed text-zinc-700">{renderFormattedContent(message.content)}</div>
+        ) : message.isStreaming ? (
+          <div className="flex items-center gap-1.5 py-2">
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+            <span className="typing-dot" />
+          </div>
+        ) : null}
+
+        {/* Citations */}
+        {message.sources && message.sources.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-zinc-100 pt-3">
+            <span className="mr-1 flex items-center gap-1 text-[11px] font-semibold text-zinc-400">
+              <Layers className="h-3.5 w-3.5" />
+              Sources
+            </span>
+            {message.sources.map((src, idx) => (
+              <button
+                key={src.chunk_id || idx}
+                onClick={() => {
+                  onOpenCitation?.(idx);
+                  onOpenCitationDrawer?.();
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[11px] text-zinc-600 shadow-sm transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+              >
+                <FileText className="h-3 w-3 text-brand-500" />
+                <span className="max-w-[130px] truncate">{src.file_name}</span>
+                <span className="font-mono text-brand-500">{Math.round(src.similarity * 100)}%</span>
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Citations Footer Badge List */}
-        {isAssistant && message.sources && message.sources.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-stone-200/80 flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-semibold text-stone-500 flex items-center gap-1 mr-1">
-                <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                Retrieved Sources ({message.sources.length}):
-              </span>
-              {message.sources.map((src, idx) => (
-                <button
-                  key={src.chunk_id || idx}
-                  onClick={() => {
-                    onOpenCitation?.(idx);
-                    onOpenCitationDrawer?.();
-                  }}
-                  className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-emerald-700 rounded-md border border-stone-300 transition-colors"
-                >
-                  <FileText className="w-3 h-3 text-emerald-600" />
-                  <span className="truncate max-w-[140px]">{src.file_name}</span>
-                  <span className="text-emerald-600 font-mono">
-                    {Math.round(src.similarity * 100)}%
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={onOpenCitationDrawer}
-              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2"
-            >
-              View Excerpts Drawer →
-            </button>
-          </div>
-        )}
-
-        {/* Execution Performance Summary */}
-        {isAssistant && message.summary && (
-          <div className="mt-2 text-[10px] text-stone-400 font-mono flex items-center gap-2">
-            <span>Model: {message.summary.model || 'llama-3.3-70b-versatile'}</span>
-            <span>•</span>
-            <span>Tokens: {message.summary.completion_tokens || 0}</span>
-            <span>•</span>
-            <span>Time: {message.summary.total_time_ms ? `${message.summary.total_time_ms}ms` : '<1s'}</span>
+        {/* Meta */}
+        {message.summary && (
+          <div className="mt-2 flex items-center gap-2 font-mono text-[10px] text-zinc-300">
+            <span>{message.summary.model || 'llama-3.3-70b-versatile'}</span>
+            <span>·</span>
+            <span>{message.summary.completion_tokens || 0} tokens</span>
+            <span>·</span>
+            <span>{message.summary.total_time_ms ? `${message.summary.total_time_ms}ms` : '<1s'}</span>
           </div>
         )}
       </div>

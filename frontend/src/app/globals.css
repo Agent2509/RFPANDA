@@ -4,38 +4,138 @@
 
 @layer base {
   :root {
-    --background: 60 20% 98%;
-    --foreground: 20 14% 4%;
+    --background: 220 20% 98%;
+    --foreground: 240 6% 10%;
+    --ring: 243 75% 59%;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply bg-[#FAFAF8] text-stone-800 antialiased selection:bg-emerald-100 selection:text-emerald-900;
+    @apply bg-canvas text-zinc-900 antialiased selection:bg-brand-100 selection:text-brand-900;
+  }
+
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
   }
 }
 
-/* Custom Sleek Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@layer components {
+  /* Surfaces */
+  .panel {
+    @apply bg-white border border-zinc-200/80 rounded-2xl shadow-soft;
+  }
+
+  .panel-muted {
+    @apply bg-zinc-50/70 border border-zinc-200/70 rounded-2xl;
+  }
+
+  /* Form controls */
+  .field {
+    @apply w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900
+           placeholder-zinc-400 shadow-sm transition
+           focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .field-icon {
+    @apply pl-10;
+  }
+
+  /* Small label */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400;
+  }
+
+  /* Chips / pills */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium;
+  }
+
+  /* Icon button */
+  .icon-btn {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white
+           text-zinc-500 transition hover:text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40;
+  }
+
+  .icon-btn-danger {
+    @apply hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50;
+  }
+
+  /* Focus ring util */
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 focus-visible:ring-offset-1;
+  }
 }
 
+/* ---- Scrollbars ---- */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(161, 161, 170, 0.45) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(168, 162, 158, 0.3);
+  background: rgba(161, 161, 170, 0.35);
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 162, 158, 0.5);
+  background: rgba(113, 113, 122, 0.55);
+  background-clip: content-box;
 }
 
-@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+/* ---- Animations (no external plugin needed) ---- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
 
-.sidebar-enter { animation: slideIn 0.3s ease-out forwards; }
-.sidebar-exit { animation: slideOut 0.2s ease-in forwards; }
+.animate-fade-in { animation: fadeIn 0.25s ease-out both; }
+.animate-fade-up { animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-scale-in { animation: scaleIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-drawer-right { animation: slideInRight 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-drawer-left { animation: slideInLeft 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.sidebar-overlay { @apply fixed inset-0 bg-black/20 backdrop-blur-sm z-40; }
+/* Typing indicator */
+.typing-dot {
+  @apply inline-block h-1.5 w-1.5 rounded-full bg-brand-500;
+  animation: dotPulse 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Subtle dotted grid backdrop */
+.bg-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(24, 24, 27, 0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+}
